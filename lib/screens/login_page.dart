@@ -35,57 +35,58 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   login() async {
-    final response = await http.post(Uri.parse("http://192.168.8.105/flutter/login.php"),
-        headers: {
-          "Access-Control-Allow-Headers": "Access-Control-Allow-Origin, Accept",
-        },
-        body: {"email": email, "password": password});
+    Map bodi = {
+      "email":email, "password":password
+    };
+    var body = json.encode(bodi);
+    final response = await http.post(Uri.parse("http://127.0.0.1:8000/api/admin/session/post"),
+        body: body);
     final data = jsonDecode(response.body);
-    int value = data['value'];
+    String status = data['status'];
     String pesan = data['message'];
-    String emailAPI = data['email'];
-    String namaAPI = data['nama'];
-    String id = data['id'];
-    if (value == 1) {
+    String token = data['token'];
+
+    if (status == "success") {
+
       setState(() {
         _loginStatus = LoginStatus.signIn;
-        savePref(value, emailAPI, namaAPI, id);
+        savePref(status, pesan, token, );
       });
+      print(status);
       print(pesan);
-      print(namaAPI);
-      print(emailAPI);
+      print(token);
     } else {
       showAlertDialog(context);
+      print(status);
       print(pesan);
     }
   }
 
-  savePref(int value, String email, String nama, String id) async {
+  savePref(String status, String pesan, String token,) async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     setState(() {
-      preferences.setInt("value", value);
-      preferences.setString("nama", nama);
-      preferences.setString("email", email);
-      preferences.setString("id", id);
+      preferences.setString("status", status);
+      preferences.setString("pesan", pesan);
+      preferences.setString("token", token);
       preferences.commit();
     });
   }
 
-  var value;
+  var status;
 
   getPref() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     setState(() {
-      value = preferences.getInt("value");
+      status = preferences.getString("status");
 
-      _loginStatus = value == 1 ? LoginStatus.signIn : LoginStatus.notSignIn;
+      _loginStatus = status == "success" ? LoginStatus.signIn : LoginStatus.notSignIn;
     });
   }
 
   signOut() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     setState(() {
-      preferences.setInt("value", null);
+      preferences.setInt("status", null);
       preferences.commit();
       _loginStatus = LoginStatus.notSignIn;
     });
@@ -202,7 +203,13 @@ class _LoginPageState extends State<LoginPage> {
                                               mainAxisAlignment: MainAxisAlignment.center,
                                               children: [
                                                 Text("Belum punya akun? ", style: TextStyle(color: Colors.grey, fontSize: 16), ),
-                                                Text("Daftar", style: TextStyle(color: Colors.blue, fontSize: 16), ),
+                                                GestureDetector(
+                                                  onTap: (){
+                                                    Navigator.of(context).push(MaterialPageRoute(
+                                                        builder: (context) =>
+                                                            Register()));
+                                                  },
+                                                    child: Text("Daftar", style: TextStyle(color: Colors.blue, fontSize: 16), )),
                                               ],
                                             )
                                           ],

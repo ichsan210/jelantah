@@ -1,6 +1,9 @@
+// @dart=2.9
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:jelantah/screens/tambah_tutorial.dart';
 import 'package:jelantah/screens/ubah_tutorial.dart';
 import 'package:jelantah/screens/login_page.dart';
@@ -8,6 +11,10 @@ import 'package:jelantah/screens/historis.dart';
 import 'package:jelantah/screens/chat_list.dart';
 import 'package:jelantah/screens/tutorial.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
 
 class Tutorial extends StatefulWidget {
 
@@ -17,22 +24,86 @@ class Tutorial extends StatefulWidget {
 
 class _TutorialState extends State<Tutorial> {
   var url = ["https://www.youtube.com/watch?v=LvUYbxlSGHw","https://www.youtube.com/watch?v=LvUYbxlSGHw","https://www.youtube.com/watch?v=LvUYbxlSGHw"];
-  var idyoutube = ["LvUYbxlSGHw","LvUYbxlSGHw","LvUYbxlSGHw"];
+  var idyoutube = ["LvUYbxlSGHw","LvUYbxlSGHw","LvUYbxlSGHw","8XYqZgntKr0"];
   var judul = ["judul1","judul2","judul3"];
   var deskripsi = ["youtube1","youtube1","youtube1"];
   var tanggal = ["10 Oktober 2021","10 Oktober 2021","10 Oktober 2021"];
 
   int _selectedNavbar = 3;
+  var _token;
+  var i;
 
-  List _isikategori =  ["Tutorial", "Edukasi"];
-  late List<DropdownMenuItem<String>> _dropdownKategori;
-  late String _kategoriterpilih;
+  var idvideo = new List();
+  var title_video = new List();
+  var description = new List();
+  var youtube_link = new List();
+  var video_category_id = new List();
+  var date = new List();
+
+  List _isikategori =  ["Edukasi"];
+  List<DropdownMenuItem<String>> _dropdownKategori;
+  String _kategoriterpilih;
+
+  var id = new List();
+  var name = new List();
+
+  get_kategori() async {
+    Map bodi = {"token": _token};
+    var body = json.encode(bodi);
+    final response = await http.post(
+      Uri.parse("http://127.0.0.1:8000/api/admin/video_categories/get"),
+      body: body,
+    );
+    final data = jsonDecode(response.body);
+    for (i = 0; i < data['video_categories'].length; i++) {
+        setState(() {
+          id.add(data['video_categories'][i]['id']);
+          name.add(data['video_categories'][i]['name']);
+        });
+    }
+    // print(data);
+    // print(name);
+  }
+
+  get_video() async {
+    Map bodi = {"token": _token, "video_category_id":1};
+    var body = json.encode(bodi);
+    final response = await http.post(
+      Uri.parse("http://127.0.0.1:8000/api/admin/videos/get"),
+      body: body,
+    );
+    final data = jsonDecode(response.body);
+    for (i = 0; i < data['videos'].length; i++) {
+      var tanggal = data['videos'][i]['updated_at'];
+      setState(() {
+        idvideo.add(data['videos'][i]['id']);
+        title_video.add(data['videos'][i]['name']);
+        description.add(data['videos'][i]['description']);
+        youtube_link.add(data['videos'][i]['youtube_link']);
+        video_category_id.add(data['videos'][i]['video_category_id']);
+        date.add(formatTanggal(tanggal));
+      });
+    }
+  }
+
+  getPref() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    setState(
+          () {
+        _token = preferences.getString("token");
+        // _token = (preferences.getString('token') ?? '');
+      },
+    );
+    get_kategori();
+    get_video();
+  }
 
   @override
   void initState() {
-    _dropdownKategori = getDropdownKategori();
-    _kategoriterpilih = _dropdownKategori[0].value!;
     super.initState();
+    getPref();
+    _dropdownKategori = getDropdownKategori();
+    _kategoriterpilih = _dropdownKategori[0].value;
   }
 
   List<DropdownMenuItem<String>> getDropdownKategori() {
@@ -51,22 +122,48 @@ class _TutorialState extends State<Tutorial> {
 
     return Center(
       child: Container(
-        width: kIsWeb ? 500.0 : double.infinity,
+        // width: kIsWeb ? 500.0 : double.infinity,
         child: DefaultTabController(
           length: 4,
           child: Scaffold(
+            appBar: AppBar(
+                titleSpacing: 0,
+                leading: IconButton(
+                  onPressed: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => LoginPage()));
+                  },
+                  color: Colors.blue,
+                  icon: Icon(Icons.keyboard_arrow_left, size: 30,),
+                ),
+                title: Text(
+                  "Kelola Video",
+                  style: TextStyle(
+                    color: Colors.blue, // 3
+                  ),
+                ),
+                backgroundColor: Colors.transparent,
+                elevation: 0.0),
             body: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Container(
-                  margin: EdgeInsets.only(left: 50, right: 50, top: 50, bottom: 20),
+                  margin: EdgeInsets.fromLTRB(30, 10, 30, 10),
                   alignment:Alignment.center,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                   child: ButtonTheme(
-                    child: DropdownButton(
-                      isExpanded: true,
-                      value: _kategoriterpilih,
-                      items: _dropdownKategori,
-                      onChanged: changedropdownKategori,
+                    alignedDropdown: true,
+                    padding: EdgeInsets.only(left: 50),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton(
+                        isExpanded: true,
+                        value: _kategoriterpilih,
+                        items: _dropdownKategori,
+                        onChanged: changedropdownKategori,
+                      ),
                     ),
                   ),
                 ),
@@ -77,418 +174,30 @@ class _TutorialState extends State<Tutorial> {
                     child: SingleChildScrollView(
                       child: Column(
                         children: [
-                          for(var i = 0; i < url.length; i++)
-                            RC_Tutorial(url: url[i], idyoutube: idyoutube[i], judul: judul[i], deskripsi: deskripsi[i], tanggal: tanggal[i]),
-                          // Container(
-                          //   margin: EdgeInsets.fromLTRB(30, 10, 30, 10),
-                          //   decoration: BoxDecoration(
-                          //     color: Colors.white,
-                          //     borderRadius: BorderRadius.circular(10),
-                          //     boxShadow: [
-                          //       BoxShadow(
-                          //         color: Colors.grey,
-                          //         offset: const Offset(1.0, 1.0),
-                          //         blurRadius: 1.0,
-                          //         spreadRadius: 1.0,
-                          //       ),
-                          //     ],
-                          //   ),
-                          //   child: Column(
-                          //     children: [
-                          //       GestureDetector(
-                          //         onTap: () async {
-                          //           String url = "https://www.youtube.com/watch?v=LvUYbxlSGHw";
-                          //           var urllaunchable = await canLaunch(url); //canLaunch is from url_launcher package
-                          //           if(urllaunchable){
-                          //             await launch(url); //launch is from url_launcher package to launch URL
-                          //           }else{
-                          //             print("URL can't be launched.");
-                          //           }
-                          //         },
-                          //         child: Container(
-                          //           padding: EdgeInsets.only(top: 70, bottom: 50, ),
-                          //           decoration: BoxDecoration(
-                          //             image: DecorationImage(
-                          //               image: NetworkImage("https://img.youtube.com/vi/LvUYbxlSGHw/0.jpg"),
-                          //               fit: BoxFit.cover,
-                          //             ),
-                          //             borderRadius: BorderRadius.vertical(top: Radius.circular(10.0)),
-                          //           ),
-                          //         ),
-                          //       ),
-                          //       Row(
-                          //         mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          //         children: [
-                          //           Column(
-                          //             children: [
-                          //               Text(
-                          //                 'Title',
-                          //                 style: TextStyle(
-                          //                   fontSize: 12,
-                          //                   color: Colors.black,
-                          //                   fontWeight: FontWeight.bold,
-                          //                 ),
-                          //               ),
-                          //               Text(
-                          //                 'Description',
-                          //                 style: TextStyle(
-                          //                   fontSize: 10,
-                          //                   color: Colors.grey,
-                          //                   fontWeight: FontWeight.bold,
-                          //                 ),
-                          //               ),
-                          //             ],
-                          //           ),
-                          //           SizedBox(width: 50),
-                          //           Column(
-                          //             children: [
-                          //               Row(
-                          //                 mainAxisAlignment: MainAxisAlignment.center,
-                          //                 children: [
-                          //                   IconButton(
-                          //                     onPressed: () {
-                          //                       Navigator.of(context).push(
-                          //                           MaterialPageRoute(
-                          //                               builder: (context) =>
-                          //                                   UbahTutorial()));
-                          //                     },
-                          //                     icon: Icon(Icons.settings, color: Colors.black,),
-                          //                   ),
-                          //                   IconButton(
-                          //                     onPressed: () {},
-                          //                     icon: Icon(Icons.delete, color: Colors.black,),
-                          //                   ),
-                          //
-                          //                 ],
-                          //               ),
-                          //               Text(
-                          //                 '8 Oktober 2021',
-                          //                 style: TextStyle(
-                          //                   fontSize: 10,
-                          //                   color: Colors.grey,
-                          //                   fontWeight: FontWeight.bold,
-                          //                 ),
-                          //               ),
-                          //             ],
-                          //           ),
-                          //         ],
-                          //       ),
-                          //       SizedBox(
-                          //         height: 10,
-                          //       ),
-                          //     ],
-                          //   ),
-                          // ),
-                          // Container(
-                          //   margin: EdgeInsets.fromLTRB(30, 10, 30, 10),
-                          //   decoration: BoxDecoration(
-                          //     color: Colors.white,
-                          //     borderRadius: BorderRadius.circular(10),
-                          //     boxShadow: [
-                          //       BoxShadow(
-                          //         color: Colors.grey,
-                          //         offset: const Offset(1.0, 1.0),
-                          //         blurRadius: 1.0,
-                          //         spreadRadius: 1.0,
-                          //       ),
-                          //     ],
-                          //   ),
-                          //   child: Column(
-                          //     children: [
-                          //       Container(
-                          //         padding: EdgeInsets.only(top: 70, bottom: 50, ),
-                          //         decoration: BoxDecoration(
-                          //           image: DecorationImage(
-                          //             image: AssetImage("assets/images/truck.jpg"),
-                          //             fit: BoxFit.cover,
-                          //           ),
-                          //           borderRadius: BorderRadius.vertical(top: Radius.circular(10.0)),
-                          //         ),
-                          //       ),
-                          //       Row(
-                          //         mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          //         children: [
-                          //           Column(
-                          //             children: [
-                          //               Text(
-                          //                 'Title',
-                          //                 style: TextStyle(
-                          //                   fontSize: 12,
-                          //                   color: Colors.black,
-                          //                   fontWeight: FontWeight.bold,
-                          //                 ),
-                          //               ),
-                          //               Text(
-                          //                 'Description',
-                          //                 style: TextStyle(
-                          //                   fontSize: 10,
-                          //                   color: Colors.grey,
-                          //                   fontWeight: FontWeight.bold,
-                          //                 ),
-                          //               ),
-                          //             ],
-                          //           ),
-                          //           SizedBox(width: 50),
-                          //           Column(
-                          //             children: [
-                          //               Row(
-                          //                 mainAxisAlignment: MainAxisAlignment.center,
-                          //                 children: [
-                          //                   IconButton(
-                          //                     onPressed: () {
-                          //                       Navigator.of(context).push(
-                          //                           MaterialPageRoute(
-                          //                               builder: (context) =>
-                          //                                   UbahTutorial()));
-                          //                     },
-                          //                     icon: Icon(Icons.settings, color: Colors.black,),
-                          //                   ),
-                          //                   IconButton(
-                          //                     onPressed: () {},
-                          //                     icon: Icon(Icons.delete, color: Colors.black,),
-                          //                   ),
-                          //
-                          //                 ],
-                          //               ),
-                          //               Text(
-                          //                 '8 Oktober 2021',
-                          //                 style: TextStyle(
-                          //                   fontSize: 10,
-                          //                   color: Colors.grey,
-                          //                   fontWeight: FontWeight.bold,
-                          //                 ),
-                          //               ),
-                          //             ],
-                          //           ),
-                          //         ],
-                          //       ),
-                          //       SizedBox(
-                          //         height: 10,
-                          //       ),
-                          //     ],
-                          //   ),
-                          // ),
-                          // Container(
-                          //   margin: EdgeInsets.fromLTRB(30, 10, 30, 10),
-                          //   decoration: BoxDecoration(
-                          //     color: Colors.white,
-                          //     borderRadius: BorderRadius.circular(10),
-                          //     boxShadow: [
-                          //       BoxShadow(
-                          //         color: Colors.grey,
-                          //         offset: const Offset(1.0, 1.0),
-                          //         blurRadius: 1.0,
-                          //         spreadRadius: 1.0,
-                          //       ),
-                          //     ],
-                          //   ),
-                          //   child: Column(
-                          //     children: [
-                          //       Container(
-                          //         padding: EdgeInsets.only(top: 70, bottom: 50, ),
-                          //         decoration: BoxDecoration(
-                          //           image: DecorationImage(
-                          //             image: AssetImage("assets/images/truck.jpg"),
-                          //             fit: BoxFit.cover,
-                          //           ),
-                          //           borderRadius: BorderRadius.vertical(top: Radius.circular(10.0)),
-                          //         ),
-                          //       ),
-                          //       Row(
-                          //         mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          //         children: [
-                          //           Column(
-                          //             children: [
-                          //               Text(
-                          //                 'Title',
-                          //                 style: TextStyle(
-                          //                   fontSize: 12,
-                          //                   color: Colors.black,
-                          //                   fontWeight: FontWeight.bold,
-                          //                 ),
-                          //               ),
-                          //               Text(
-                          //                 'Description',
-                          //                 style: TextStyle(
-                          //                   fontSize: 10,
-                          //                   color: Colors.grey,
-                          //                   fontWeight: FontWeight.bold,
-                          //                 ),
-                          //               ),
-                          //             ],
-                          //           ),
-                          //           SizedBox(width: 50),
-                          //           Column(
-                          //             children: [
-                          //               Row(
-                          //                 mainAxisAlignment: MainAxisAlignment.center,
-                          //                 children: [
-                          //                   IconButton(
-                          //                     onPressed: () {
-                          //                       Navigator.of(context).push(
-                          //                           MaterialPageRoute(
-                          //                               builder: (context) =>
-                          //                                   UbahTutorial()));
-                          //                     },
-                          //                     icon: Icon(Icons.settings, color: Colors.black,),
-                          //                   ),
-                          //                   IconButton(
-                          //                     onPressed: () {},
-                          //                     icon: Icon(Icons.delete, color: Colors.black,),
-                          //                   ),
-                          //
-                          //                 ],
-                          //               ),
-                          //               Text(
-                          //                 '8 Oktober 2021',
-                          //                 style: TextStyle(
-                          //                   fontSize: 10,
-                          //                   color: Colors.grey,
-                          //                   fontWeight: FontWeight.bold,
-                          //                 ),
-                          //               ),
-                          //             ],
-                          //           ),
-                          //         ],
-                          //       ),
-                          //       SizedBox(
-                          //         height: 10,
-                          //       ),
-                          //     ],
-                          //   ),
-                          // ),
+                          for (var i = 0; i < idvideo.length; i++)
+                            RC_Video(
+                                idvideo : idvideo[i],
+                                url: youtube_link[i],
+                                idyoutube: youtube_link[i],
+                                video_category_id: video_category_id[i],
+                                judul: title_video[i],
+                                deskripsi: description[i],
+                                tanggal: date[i]),
                         ],
                       ),
                     ),
                   ),
                 ),
-                Container(
-                  margin: EdgeInsets.fromLTRB(30, 5, 30, 30),
-                  padding: EdgeInsets.only( left: 15, top: 10, bottom: 10),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(10),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey,
-                        offset: const Offset(1.0, 1.0),
-                        blurRadius: 1.0,
-                        spreadRadius: 1.0,
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            'Tambah Tutorial\n& Edukasi',
-                            style: TextStyle(
-                              fontSize: 20,
-                              color: Colors.black,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(width: 100),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          RawMaterialButton(
-                            onPressed: () {
-                              Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          TambahTutorial()));
-                            },
-                            elevation: 2.0,
-                            fillColor: Colors.blue,
-                            child: Icon(
-                              Icons.arrow_forward,
-                              size: 20.0,
-                              color: Colors.white,
-                            ),
-                            padding: EdgeInsets.all(15.0),
-                            shape: CircleBorder(),
-                          )
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
               ],
             ),
-            bottomNavigationBar: BottomNavigationBar(
-              type: BottomNavigationBarType.fixed,
-              items: const <BottomNavigationBarItem>[
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.home),
-                  title: Text(''),
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.date_range_sharp),
-                  title: Text(''),
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.mail_outline_rounded),
-                  title: Text(''),
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.video_collection_rounded),
-                  title: Text(''),
-                ),
-              ],
-              currentIndex: _selectedNavbar,
-              selectedItemColor: Colors.black,
-              unselectedItemColor: Colors.grey,
-              showUnselectedLabels: true,
-              onTap: (index) {
-                switch (index) {
-                  case 0:
-                    Navigator.push(
-                      context,
-                      PageRouteBuilder(
-                        pageBuilder: (c, a1, a2) => LoginPage(),
-                        transitionsBuilder: (c, anim, a2, child) => FadeTransition(opacity: anim, child: child),
-                        transitionDuration: Duration(milliseconds: 200),
-                      ),
-                    );
-                    break;
-                  case 1:
-                    Navigator.push(
-                      context,
-                      PageRouteBuilder(
-                        pageBuilder: (c, a1, a2) => Historis(),
-                        transitionsBuilder: (c, anim, a2, child) => FadeTransition(opacity: anim, child: child),
-                        transitionDuration: Duration(milliseconds: 300),
-                      ),
-                    );
-                    break;
-                  case 2:
-                    Navigator.push(
-                      context,
-                      PageRouteBuilder(
-                        pageBuilder: (c, a1, a2) => ChatList(),
-                        transitionsBuilder: (c, anim, a2, child) => FadeTransition(opacity: anim, child: child),
-                        transitionDuration: Duration(milliseconds: 300),
-                      ),
-                    );
-                    break;
-                  case 3:
-                    Navigator.push(
-                      context,
-                      PageRouteBuilder(
-                        pageBuilder: (c, a1, a2) => Tutorial(),
-                        transitionsBuilder: (c, anim, a2, child) => FadeTransition(opacity: anim, child: child),
-                        transitionDuration: Duration(milliseconds: 300),
-                      ),
-                    );
-                    break;
-                }
+            floatingActionButton: FloatingActionButton(
+              onPressed: () {
+                Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) =>
+                        TambahTutorial()));
               },
+              child: Icon(Icons.add),
+              backgroundColor: Colors.blue,
             ),
           ),
         ),
@@ -496,117 +205,108 @@ class _TutorialState extends State<Tutorial> {
     );
   }
 
-  void changedropdownKategori(String? kategoriTerpilih) {
+  void changedropdownKategori(String kategoriTerpilih) {
     setState(() {
-      _kategoriterpilih = kategoriTerpilih!;
+      _kategoriterpilih = kategoriTerpilih;
     });
+  }
+
+  formatTanggal(tanggal) {
+    var datestring = tanggal.toString();
+    DateTime parseDate =
+    new DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").parse(datestring);
+    var inputDate = DateTime.parse(parseDate.toString());
+    var outputFormat = DateFormat("d MMMM yyyy","id_ID");
+    var outputDate = outputFormat.format(inputDate);
+    return outputDate;
   }
 }
 
-class RC_Tutorial extends StatelessWidget {
+class RC_Video extends StatelessWidget {
+  RC_Video(
+      { this.url,
+         this.idyoutube,
+         this.judul,
+         this.deskripsi,
+         this.tanggal,
+         this.idvideo, this.video_category_id});
 
-  RC_Tutorial({required this.url, required this.idyoutube, required this.judul, required this.deskripsi, required this.tanggal});
   String url, idyoutube, judul, deskripsi, tanggal;
+  int idvideo, video_category_id;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.fromLTRB(30, 10, 30, 10),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey,
-            offset: const Offset(1.0, 1.0),
-            blurRadius: 1.0,
-            spreadRadius: 1.0,
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          GestureDetector(
-            onTap: () async {
-              var urllaunchable = await canLaunch(url); //canLaunch is from url_launcher package
-              if(urllaunchable){
-                await launch(url); //launch is from url_launcher package to launch URL
-              }else{
-                print("URL can't be launched.");
-              }
-            },
-            child: Container(
-              padding: EdgeInsets.only(top: 70, bottom: 50, ),
+    return GestureDetector(
+      onTap: () {
+        Navigator.of(context).push(MaterialPageRoute(
+            builder: (context) =>
+                UbahTutorial(idvideo: idvideo, judul:judul, url:"https://www.youtube.com/watch?v="+url, deskripsi:deskripsi, video_category_id:video_category_id )));
+      },
+      child: Container(
+        margin: EdgeInsets.fromLTRB(30, 10, 30, 10),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 80,
+              height: 80,
+              margin: EdgeInsets.all(10),
               decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
                 image: DecorationImage(
-                  image: NetworkImage("https://img.youtube.com/vi/$idyoutube/0.jpg"),
+                  image:
+                  NetworkImage("https://img.youtube.com/vi/$idyoutube/0.jpg"),
                   fit: BoxFit.cover,
                 ),
-                borderRadius: BorderRadius.vertical(top: Radius.circular(10.0)),
               ),
             ),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              Column(
-                children: [
-                  Text(
-                    judul,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.black,
-                      fontWeight: FontWeight.bold,
-                    ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  tanggal,
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: Colors.grey,
                   ),
-                  Text(
-                    deskripsi,
-                    style: TextStyle(
-                      fontSize: 10,
-                      color: Colors.grey,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(width: 50),
-              Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                ),
+                Container(
+                  width: 300,
+                  child: Row(
                     children: [
-                      IconButton(
-                        onPressed: () {
-                          Navigator.of(context).push(
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      UbahTutorial()));
-                        },
-                        icon: Icon(Icons.settings, color: Colors.black,),
-                      ),
-                      IconButton(
-                        onPressed: () {},
-                        icon: Icon(Icons.delete, color: Colors.black,),
-                      ),
-
+                      Flexible(
+                        child: new Text(
+                          judul,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.black,
+                          ),
+                        ),)
                     ],
                   ),
-                  Text(
-                    tanggal,
-                    style: TextStyle(
-                      fontSize: 10,
-                      color: Colors.grey,
-                      fontWeight: FontWeight.bold,
-                    ),
+                ),
+                Container(
+                  width: 300,
+                  child: Row(
+                    children: [
+                      Flexible(
+                        child: new Text(
+                          deskripsi,
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: Colors.grey,
+                          ),
+                        ),)
+                    ],
                   ),
-                ],
-              ),
-            ],
-          ),
-          SizedBox(
-            height: 10,
-          ),
-        ],
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

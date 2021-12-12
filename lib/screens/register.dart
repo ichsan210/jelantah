@@ -29,7 +29,7 @@ class _RegisterState extends State<Register> {
   }
 
   save() async {
-    final response = await http.post(Uri.parse("http://192.168.8.102/flutter/register.php"),
+    final response = await http.post(Uri.parse("http://192.168.8.103/flutter/register.php"),
         headers: {
           "Access-Control-Allow-Origin": "*"
         },

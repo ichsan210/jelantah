@@ -9,6 +9,10 @@ import 'package:jelantah/screens/historis.dart';
 import 'package:jelantah/screens/chat_list.dart';
 import 'package:jelantah/screens/tutorial.dart';
 import 'package:flutter_icons/flutter_icons.dart';
+import 'package:jelantah/screens/account.dart';
+
+const activeButtonColor = Color(0xffE7EEF4);
+const inactiveButtonColor = Color(0xffFFFFFF);
 
 class Historis extends StatefulWidget {
   @override
@@ -16,7 +20,7 @@ class Historis extends StatefulWidget {
 }
 
 class _HistorisState extends State<Historis> {
-  var orderid = ["123-456-789", "123-456-789", "123-456-789", "123-456-789"];
+  var orderid = ["123-456-781", "123-456-782", "123-456-783", "123-456-784"];
   var alamat = [
     "Jalan Cut Meutia No 1, Jakarta Barat, 11146",
     "Jalan Cut Meutia No 1, Jakarta Barat, 11146",
@@ -42,6 +46,82 @@ class _HistorisState extends State<Historis> {
     "10",
   ];
 
+  Color semuaColor = inactiveButtonColor;
+  Color prosesColor = activeButtonColor;
+  Color perjalananColor = inactiveButtonColor;
+  Color selesaiColor = inactiveButtonColor;
+  Color batalColor = inactiveButtonColor;
+
+  var statusTerpilih="Proses";
+
+  void updateButtonStyle(String status){
+    if (status=="semua"){
+      setState(() {
+        statusTerpilih="Semua";
+      });
+      print("semua jalan");
+      if (semuaColor == inactiveButtonColor){
+        semuaColor=activeButtonColor;
+        prosesColor=inactiveButtonColor;
+        perjalananColor=inactiveButtonColor;
+        selesaiColor=inactiveButtonColor;
+        batalColor=inactiveButtonColor;
+      }
+    }
+    if (status=="proses"){
+      setState(() {
+        statusTerpilih="Proses";
+      });
+      print("proses jalan");
+      if (prosesColor == inactiveButtonColor){
+        semuaColor=inactiveButtonColor;
+        prosesColor=activeButtonColor;
+        perjalananColor=inactiveButtonColor;
+        selesaiColor=inactiveButtonColor;
+        batalColor=inactiveButtonColor;
+      }
+    }
+    if (status=="perjalanan"){
+      setState(() {
+        statusTerpilih="Dalam Perjalanan";
+      });
+      print("perjalanan jalan");
+      if (perjalananColor == inactiveButtonColor){
+        semuaColor=inactiveButtonColor;
+        prosesColor=inactiveButtonColor;
+        perjalananColor=activeButtonColor;
+        selesaiColor=inactiveButtonColor;
+        batalColor=inactiveButtonColor;
+      }
+    }
+    if (status=="selesai"){
+      setState(() {
+        statusTerpilih="Selesai";
+      });
+      print("selesai jalan");
+      if (selesaiColor == inactiveButtonColor){
+        semuaColor=inactiveButtonColor;
+        prosesColor=inactiveButtonColor;
+        perjalananColor=inactiveButtonColor;
+        selesaiColor=activeButtonColor;
+        batalColor=inactiveButtonColor;
+      }
+    }
+    if (status=="batal"){
+      setState(() {
+        statusTerpilih="Batal";
+      });
+      print("Batal jalan");
+      if (batalColor == inactiveButtonColor){
+        semuaColor=inactiveButtonColor;
+        prosesColor=inactiveButtonColor;
+        perjalananColor=inactiveButtonColor;
+        selesaiColor=inactiveButtonColor;
+        batalColor=activeButtonColor;
+      }
+    }
+  }
+
   getPref() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     setState(
@@ -55,6 +135,8 @@ class _HistorisState extends State<Historis> {
     super.initState();
     getPref();
   }
+
+
 
   int _selectedNavbar = 1;
 
@@ -89,7 +171,7 @@ class _HistorisState extends State<Historis> {
   Widget build(BuildContext context) {
     return Center(
       child: Container(
-        width: kIsWeb ? 500.0 : double.infinity,
+        // width: kIsWeb ? 500.0 : double.infinity,
         child: DefaultTabController(
           length: 4,
           child: Scaffold(
@@ -114,30 +196,94 @@ class _HistorisState extends State<Historis> {
                       child: Row(
                         children: [
                           TextButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              setState(() {
+                                updateButtonStyle("semua");
+                              });
+                            },
                             child: Text("Semua"),
                             style: ButtonStyle(
-                              backgroundColor: MaterialStateProperty.all(
-                                Color(0xffE7EEF4),
-                              ),
+                                backgroundColor: MaterialStateProperty.all(
+                                  semuaColor,
+                                ),
                                 shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                                     RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(10.0),
+                                      borderRadius: BorderRadius.circular(10.0),
                                     )
                                 )
                             ),
                           ),
                           TextButton(
-                            onPressed: () {},
-                            child: Text("Selesai"),
-                          ),
-                          TextButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              setState(() {
+                                updateButtonStyle("proses");
+                              });
+                            },
                             child: Text("Proses"),
+                            style: ButtonStyle(
+                                backgroundColor: MaterialStateProperty.all(
+                                  prosesColor,
+                                ),
+                                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                                    RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10.0),
+                                    )
+                                )
+                            ),
                           ),
                           TextButton(
-                            onPressed: () {},
-                            child: Text("Konfirmasi"),
+                            onPressed: () {
+                              setState(() {
+                                updateButtonStyle("perjalanan");
+                              });
+                            },
+                            child: Text("Dalam Perjalanan"),
+                            style: ButtonStyle(
+                                backgroundColor: MaterialStateProperty.all(
+                                  perjalananColor,
+                                ),
+                                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                                    RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10.0),
+                                    )
+                                )
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              setState(() {
+                                updateButtonStyle("selesai");
+                              });
+                            },
+                            child: Text("Selesai"),
+                            style: ButtonStyle(
+                                backgroundColor: MaterialStateProperty.all(
+                                  selesaiColor,
+                                ),
+                                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                                    RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10.0),
+                                    )
+                                )
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              setState(() {
+                                updateButtonStyle("batal");
+                              });
+                            },
+                            child: Text("Batal"),
+                            style: ButtonStyle(
+                                backgroundColor: MaterialStateProperty.all(
+                                  batalColor,
+                                ),
+                                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                                    RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10.0),
+                                    )
+                                )
+                            ),
                           ),
                         ],
                       ),
@@ -150,14 +296,24 @@ class _HistorisState extends State<Historis> {
                           child: Column(
                             children: [
                               for (var i = 0; i < orderid.length; i++)
-                                RC_Historis(
-                                  orderid: orderid[i],
-                                  alamat: alamat[i],
-                                  estimasi: estimasi[i],
-                                  status: status[i],
-                                  volume: volume[i],
-                                  color: Colors.blue,
-                                )
+                                if(status[i].toString()==statusTerpilih)
+                                  RC_Historis(
+                                    orderid: orderid[i],
+                                    alamat: alamat[i],
+                                    estimasi: estimasi[i],
+                                    status: status[i],
+                                    volume: volume[i],
+                                    color: Colors.blue,
+                                  )
+                              else if(statusTerpilih=="Semua")
+                                  RC_Historis(
+                                    orderid: orderid[i],
+                                    alamat: alamat[i],
+                                    estimasi: estimasi[i],
+                                    status: status[i],
+                                    volume: volume[i],
+                                    color: Colors.blue,
+                                  )
                               // RC_Historis(orderid: '123-456-333', alamat: 'Jalan Cut Meutia No 1, Jakarta Barat, 11146', estimasi: 'Senin, 1 Agustus 2021', status: 'Selesai', volume: '10', color: Colors.blue,),
                               // RC_Historis(orderid: '123-456-111', alamat: 'Jalan Cut Meutia No 1, Jakarta Barat, 11146', estimasi: 'Senin, 1 Agustus 2021', status: 'Batal', volume: '10', color: Colors.red,),
                               // RC_Historis(orderid: '123-456-333', alamat: 'Jalan Cut Meutia No 1, Jakarta Barat, 11146', estimasi: 'Senin, 1 Agustus 2021', status: 'Selesai', volume: '10', color: Colors.blue,),
@@ -234,7 +390,7 @@ class _HistorisState extends State<Historis> {
                     Navigator.push(
                       context,
                       PageRouteBuilder(
-                        pageBuilder: (c, a1, a2) => Tutorial(),
+                        pageBuilder: (c, a1, a2) => Account(),
                         transitionsBuilder: (c, anim, a2, child) =>
                             FadeTransition(opacity: anim, child: child),
                         transitionDuration: Duration(milliseconds: 300),

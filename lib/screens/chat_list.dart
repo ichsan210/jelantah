@@ -6,6 +6,8 @@ import 'package:jelantah/screens/login_page.dart';
 import 'package:jelantah/screens/historis.dart';
 import 'package:jelantah/screens/chat_list.dart';
 import 'package:jelantah/screens/tutorial.dart';
+import 'package:flutter_icons/flutter_icons.dart';
+import 'package:jelantah/screens/account.dart';
 
 class ChatList extends StatefulWidget {
 
@@ -48,77 +50,78 @@ class _ChatListState extends State<ChatList> {
                 ),
               ),
             ),
-            bottomNavigationBar: Container(
-              width: kIsWeb ? 500.0 : double.infinity,
-              child: BottomNavigationBar(
-                type: BottomNavigationBarType.fixed,
-                items: const <BottomNavigationBarItem>[
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.home),
-                    title: Text(''),
-                  ),
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.date_range_sharp),
-                    title: Text(''),
-                  ),
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.mail_outline_rounded),
-                    title: Text(''),
-                  ),
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.video_collection_rounded),
-                    title: Text(''),
-                  ),
-                ],
-                currentIndex: _selectedNavbar,
-                selectedItemColor: Colors.black,
-                unselectedItemColor: Colors.grey,
-                showUnselectedLabels: true,
-                onTap: (index) {
-                  switch (index) {
-                    case 0:
-                      Navigator.push(
-                        context,
-                        PageRouteBuilder(
-                          pageBuilder: (c, a1, a2) => LoginPage(),
-                          transitionsBuilder: (c, anim, a2, child) => FadeTransition(opacity: anim, child: child),
-                          transitionDuration: Duration(milliseconds: 200),
-                        ),
-                      );
-                      break;
-                    case 1:
-                      Navigator.push(
-                        context,
-                        PageRouteBuilder(
-                          pageBuilder: (c, a1, a2) => Historis(),
-                          transitionsBuilder: (c, anim, a2, child) => FadeTransition(opacity: anim, child: child),
-                          transitionDuration: Duration(milliseconds: 300),
-                        ),
-                      );
-                      break;
-                    case 2:
-                      Navigator.push(
-                        context,
-                        PageRouteBuilder(
-                          pageBuilder: (c, a1, a2) => ChatList(),
-                          transitionsBuilder: (c, anim, a2, child) => FadeTransition(opacity: anim, child: child),
-                          transitionDuration: Duration(milliseconds: 300),
-                        ),
-                      );
-                      break;
-                    case 3:
-                      Navigator.push(
-                        context,
-                        PageRouteBuilder(
-                          pageBuilder: (c, a1, a2) => Tutorial(),
-                          transitionsBuilder: (c, anim, a2, child) => FadeTransition(opacity: anim, child: child),
-                          transitionDuration: Duration(milliseconds: 300),
-                        ),
-                      );
-                      break;
-                  }
-                },
-              ),
+            bottomNavigationBar: BottomNavigationBar(
+              type: BottomNavigationBarType.fixed,
+              items: const <BottomNavigationBarItem>[
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.home_outlined),
+                  title: Text('Beranda'),
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(FlutterIcons.file_text_o_faw),
+                  title: Text('Riwayat'),
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.chat_outlined),
+                  title: Text('Pesan'),
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.person_outline),
+                  title: Text('Profil'),
+                ),
+              ],
+              currentIndex: _selectedNavbar,
+              selectedItemColor: Colors.blue,
+              unselectedItemColor: Colors.blueGrey,
+              showUnselectedLabels: true,
+              onTap: (index) {
+                switch (index) {
+                  case 0:
+                    Navigator.push(
+                      context,
+                      PageRouteBuilder(
+                        pageBuilder: (c, a1, a2) => LoginPage(),
+                        transitionsBuilder: (c, anim, a2, child) =>
+                            FadeTransition(opacity: anim, child: child),
+                        transitionDuration: Duration(milliseconds: 200),
+                      ),
+                    );
+                    break;
+                  case 1:
+                    Navigator.push(
+                      context,
+                      PageRouteBuilder(
+                        pageBuilder: (c, a1, a2) => Historis(),
+                        transitionsBuilder: (c, anim, a2, child) =>
+                            FadeTransition(opacity: anim, child: child),
+                        transitionDuration: Duration(milliseconds: 300),
+                      ),
+                    );
+                    break;
+                  case 2:
+                    Navigator.push(
+                      context,
+                      PageRouteBuilder(
+                        pageBuilder: (c, a1, a2) => ChatList(),
+                        transitionsBuilder: (c, anim, a2, child) =>
+                            FadeTransition(opacity: anim, child: child),
+                        transitionDuration: Duration(milliseconds: 300),
+                      ),
+                    );
+                    break;
+                  case 3:
+                    Navigator.push(
+                      context,
+                      PageRouteBuilder(
+                        pageBuilder: (c, a1, a2) => Account(),
+                        transitionsBuilder: (c, anim, a2, child) =>
+                            FadeTransition(opacity: anim, child: child),
+                        transitionDuration: Duration(milliseconds: 300),
+                      ),
+                    );
+                    break;
+                }
+              },
             ),
           ),
         ),
