@@ -78,6 +78,8 @@ class _PermintaanPenjemputanState extends State<PermintaanPenjemputan> {
   var postal_code = new List();
   var status = new List();
   var tanggalOrder = new List();
+  var latitude = new List();
+  var longitude = new List();
 
   get_data() async {
     Map bodi = {
@@ -107,6 +109,8 @@ class _PermintaanPenjemputanState extends State<PermintaanPenjemputan> {
         estimate_volume.add(data['pickup_orders']['data'][i]['estimate_volume'].toString());
         status.add(data['pickup_orders']['data'][i]['status']);
         tanggalOrder.add(formatTanggal(tanggal));
+        latitude.add(data['pickup_orders']['data'][i]['latitude'].toString());
+        longitude.add(data['pickup_orders']['data'][i]['longitude'].toString());
       });
     }
   }
@@ -199,6 +203,8 @@ class _PermintaanPenjemputanState extends State<PermintaanPenjemputan> {
                                 volume: estimate_volume[i],
                                 tanggalOrder: tanggalOrder[i],
                                 tanggalEstimasi: tanggalEstimasi(context),
+                                latitude: latitude[i],
+                                longitude: longitude[i],
                               ),
                           ],
                         ),
@@ -273,7 +279,6 @@ class _PermintaanPenjemputanState extends State<PermintaanPenjemputan> {
     setState(() {
       namaKota[i]=cityName;
     });
-    print(cityName);
   }
 
 // void changedropdownKota(String? kotaTerpilih) {
@@ -300,9 +305,10 @@ class RC_PermintaanPenjemputan extends StatelessWidget {
     this.tanggalOrder,
     this.namaKota,
     this.postal_code,
+    this.latitude, this.longitude
   });
 
-  String orderid, alamat, estimasi, status, volume, tanggalOrder, namaKota, postal_code;
+  String orderid, alamat, estimasi, status, volume, tanggalOrder, namaKota, postal_code, latitude, longitude;
   Container tanggalEstimasi;
 
   @override
@@ -432,7 +438,7 @@ class RC_PermintaanPenjemputan extends StatelessWidget {
       // },
       onTap: (){
         Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => DetailPermintaan(orderid:orderid)));
+                    builder: (context) => DetailPermintaan(orderid:orderid, latitude:latitude, longitude:longitude)));
       },
       child: Container(
         margin: EdgeInsets.fromLTRB(30, 5, 30, 5),

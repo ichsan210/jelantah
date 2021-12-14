@@ -48,10 +48,10 @@ class _DashboardState extends State<Dashboard> {
   var tanggal = ["10 Oktober 2021", "10 Oktober 2021", "10 Oktober 2021"];
 
   String _token;
-  var _first_name = " ";
-  var _last_name = " ";
-  var _pemasokan = " ";
-  var _pengeluaran = " ";
+  var _first_name = "..";
+  var _last_name = "..";
+  var _pemasokan = "0";
+  var _pengeluaran = "0";
   var i;
 
   var id = new List();
@@ -68,7 +68,7 @@ class _DashboardState extends State<Dashboard> {
       body: body,
     );
     final data = jsonDecode(response.body);
-    print(_token);
+    print(1);
     String first_name = data['user']['first_name'];
     String last_name = data['user']['last_name'];
     setState(() {
@@ -85,7 +85,7 @@ class _DashboardState extends State<Dashboard> {
       body: body,
     );
     final data = jsonDecode(response.body);
-    print(_token);
+    print(2);
     int pengeluaran = data['total_price'];
     int pemasokan = data['total_weight'];
     setState(() {
@@ -119,7 +119,7 @@ class _DashboardState extends State<Dashboard> {
     setState(
       () {
         _token = preferences.getString("token");
-        // _token = (preferences.getString('token') ?? '');
+        print(_token);
       },
     );
     get_data();

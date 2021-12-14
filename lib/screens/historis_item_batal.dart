@@ -8,16 +8,16 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
-class Historis_Item_Selesai extends StatefulWidget {
+class Historis_Item_Batal extends StatefulWidget {
 
   final String orderid;
-  Historis_Item_Selesai({ Key key, String this.orderid})
+  Historis_Item_Batal({ Key key, String this.orderid})
       : super(key: key);
   @override
-  _Historis_Item_SelesaiState createState() => _Historis_Item_SelesaiState();
+  _Historis_Item_BatalState createState() => _Historis_Item_BatalState();
 }
 
-class _Historis_Item_SelesaiState extends State<Historis_Item_Selesai> {
+class _Historis_Item_BatalState extends State<Historis_Item_Batal> {
   var _token;
 
   var id="";
@@ -36,6 +36,7 @@ class _Historis_Item_SelesaiState extends State<Historis_Item_Selesai> {
   var price="";
   var total_price="";
   var i;
+  var cancel_reason="";
 
   get_CityID(idcity) async {
     Map bodi = {
@@ -127,11 +128,12 @@ class _Historis_Item_SelesaiState extends State<Historis_Item_Selesai> {
         namaDriver(idDriver);
       }
       postal_code = data['pickup_orders']['postal_code'];
-      estimate_volume = data['pickup_orders']['weighing_volume'].toString();
+      estimate_volume = data['pickup_orders']['estimate_volume'].toString();
       status = data['pickup_orders']['status'];
       tanggalOrder = formatTanggal(tanggal);
       price = data['pickup_orders']['price'].toString();
       total_price = data['pickup_orders']['total_price'].toString();
+      cancel_reason = data['pickup_orders']['cancel_reason'];
     });
     print(data);
     // print(latitude);
@@ -174,7 +176,7 @@ class _Historis_Item_SelesaiState extends State<Historis_Item_Selesai> {
                 ),
               ),
               title: Text(
-                "Order Selesai ID "+widget.orderid,
+                "Order Batal ID "+widget.orderid,
                 style: TextStyle(
                   color: Colors.blue, // 3
                 ),
@@ -186,7 +188,7 @@ class _Historis_Item_SelesaiState extends State<Historis_Item_Selesai> {
               Container(
                 width: 200,
                   child: FittedBox(
-                      child: Icon(Icons.check_circle_outline, color: Colors.green,),
+                      child: Icon(Icons.cancel_outlined, color: Colors.red,),
                       fit: BoxFit.fill)),
               Expanded(
                 child: Container(
@@ -316,7 +318,7 @@ class _Historis_Item_SelesaiState extends State<Historis_Item_Selesai> {
                             CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Total Volume',
+                                'Estimasi Volume',
                                 style: TextStyle(
                                   fontSize: 10,
                                   color: Colors.grey,
@@ -369,7 +371,7 @@ class _Historis_Item_SelesaiState extends State<Historis_Item_Selesai> {
                             CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Total Harga',
+                                'Alasan Pembatalan',
                                 style: TextStyle(
                                   fontSize: 10,
                                   color: Colors.grey,
@@ -377,7 +379,7 @@ class _Historis_Item_SelesaiState extends State<Historis_Item_Selesai> {
                                 ),
                               ),
                               Text(
-                                'Rp. '+total_price+',-',
+                                cancel_reason,
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: Colors.black,
@@ -386,16 +388,16 @@ class _Historis_Item_SelesaiState extends State<Historis_Item_Selesai> {
                               ),
                             ],
                           ),
-                          if (status == 'closed')
+                          if (status == 'cancelled')
                             TextButton(
                               onPressed: () {},
                               child: Text(
-                                "Selesai",
-                                style: TextStyle(color: Colors.green),
+                                "Batal",
+                                style: TextStyle(color: Colors.red),
                               ),
                               style: ButtonStyle(
                                   backgroundColor: MaterialStateProperty.all(
-                                    Color(0xffECF8ED),
+                                    Color(0xffFBE8E8),
                                   ),
                                   shape:
                                   MaterialStateProperty.all<RoundedRectangleBorder>(

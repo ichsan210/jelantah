@@ -1,6 +1,11 @@
+// @dart=2.9
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:jelantah/screens/detail_permintaan.dart';
+import 'package:jelantah/screens/historis_item_batal.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:jelantah/screens/historis_item_selesai.dart';
 import 'package:intl/intl.dart';
@@ -10,6 +15,7 @@ import 'package:jelantah/screens/chat_list.dart';
 import 'package:jelantah/screens/tutorial.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:jelantah/screens/account.dart';
+import 'package:http/http.dart' as http;
 
 const activeButtonColor = Color(0xffE7EEF4);
 const inactiveButtonColor = Color(0xffFFFFFF);
@@ -20,31 +26,31 @@ class Historis extends StatefulWidget {
 }
 
 class _HistorisState extends State<Historis> {
-  var orderid = ["123-456-781", "123-456-782", "123-456-783", "123-456-784"];
-  var alamat = [
-    "Jalan Cut Meutia No 1, Jakarta Barat, 11146",
-    "Jalan Cut Meutia No 1, Jakarta Barat, 11146",
-    "Jalan Cut Meutia No 1, Jakarta Barat, 11146",
-    "Jalan Cut Meutia No 1, Jakarta Barat, 11146",
-  ];
-  var estimasi = [
-    "Senin, 22 November 2021",
-    "Senin, 22 November 2021",
-    "Senin, 22 November 2021",
-    "Senin, 22 November 2021",
-  ];
-  var status = [
-    "Selesai",
-    "Batal",
-    "Proses",
-    "Dalam Perjalanan",
-  ];
-  var volume = [
-    "10",
-    "10",
-    "10",
-    "10",
-  ];
+  // var orderid = ["123-456-781", "123-456-782", "123-456-783", "123-456-784"];
+  // var alamat = [
+  //   "Jalan Cut Meutia No 1, Jakarta Barat, 11146",
+  //   "Jalan Cut Meutia No 1, Jakarta Barat, 11146",
+  //   "Jalan Cut Meutia No 1, Jakarta Barat, 11146",
+  //   "Jalan Cut Meutia No 1, Jakarta Barat, 11146",
+  // ];
+  // var estimasi = [
+  //   "Senin, 22 November 2021",
+  //   "Senin, 22 November 2021",
+  //   "Senin, 22 November 2021",
+  //   "Senin, 22 November 2021",
+  // ];
+  // var status = [
+  //   "Selesai",
+  //   "Batal",
+  //   "Proses",
+  //   "Dalam Perjalanan",
+  // ];
+  // var volume = [
+  //   "10",
+  //   "10",
+  //   "10",
+  //   "10",
+  // ];
 
   Color semuaColor = inactiveButtonColor;
   Color prosesColor = activeButtonColor;
@@ -52,81 +58,131 @@ class _HistorisState extends State<Historis> {
   Color selesaiColor = inactiveButtonColor;
   Color batalColor = inactiveButtonColor;
 
-  var statusTerpilih="Proses";
+  var statusTerpilih = "processed";
 
-  void updateButtonStyle(String status){
-    if (status=="semua"){
+  var _token;
+
+  var i;
+
+  var id = new List();
+  var pickup_order_no = new List();
+  var address = new List();
+  var pickup_date = new List();
+  var estimate_volume = new List();
+  var namaKota = new List();
+  var postal_code = new List();
+  var status = new List();
+  var tanggalOrder = new List();
+  var latitude = new List();
+  var longitude = new List();
+
+  void updateButtonStyle(String status) {
+    //refeshData();
+    if (status == "semua") {
       setState(() {
-        statusTerpilih="Semua";
+        statusTerpilih = "Semua";
       });
-      print("semua jalan");
-      if (semuaColor == inactiveButtonColor){
-        semuaColor=activeButtonColor;
-        prosesColor=inactiveButtonColor;
-        perjalananColor=inactiveButtonColor;
-        selesaiColor=inactiveButtonColor;
-        batalColor=inactiveButtonColor;
+      if (semuaColor == inactiveButtonColor) {
+        semuaColor = activeButtonColor;
+        prosesColor = inactiveButtonColor;
+        perjalananColor = inactiveButtonColor;
+        selesaiColor = inactiveButtonColor;
+        batalColor = inactiveButtonColor;
       }
     }
-    if (status=="proses"){
+    if (status == "processed") {
       setState(() {
-        statusTerpilih="Proses";
+        statusTerpilih = "processed";
       });
-      print("proses jalan");
-      if (prosesColor == inactiveButtonColor){
-        semuaColor=inactiveButtonColor;
-        prosesColor=activeButtonColor;
-        perjalananColor=inactiveButtonColor;
-        selesaiColor=inactiveButtonColor;
-        batalColor=inactiveButtonColor;
+      if (prosesColor == inactiveButtonColor) {
+        semuaColor = inactiveButtonColor;
+        prosesColor = activeButtonColor;
+        perjalananColor = inactiveButtonColor;
+        selesaiColor = inactiveButtonColor;
+        batalColor = inactiveButtonColor;
       }
     }
-    if (status=="perjalanan"){
+    if (status == "on_pickup") {
       setState(() {
-        statusTerpilih="Dalam Perjalanan";
+        statusTerpilih = "on_pickup";
       });
-      print("perjalanan jalan");
-      if (perjalananColor == inactiveButtonColor){
-        semuaColor=inactiveButtonColor;
-        prosesColor=inactiveButtonColor;
-        perjalananColor=activeButtonColor;
-        selesaiColor=inactiveButtonColor;
-        batalColor=inactiveButtonColor;
+      if (perjalananColor == inactiveButtonColor) {
+        semuaColor = inactiveButtonColor;
+        prosesColor = inactiveButtonColor;
+        perjalananColor = activeButtonColor;
+        selesaiColor = inactiveButtonColor;
+        batalColor = inactiveButtonColor;
       }
     }
-    if (status=="selesai"){
+    if (status == "closed") {
       setState(() {
-        statusTerpilih="Selesai";
+        statusTerpilih = "closed";
       });
-      print("selesai jalan");
-      if (selesaiColor == inactiveButtonColor){
-        semuaColor=inactiveButtonColor;
-        prosesColor=inactiveButtonColor;
-        perjalananColor=inactiveButtonColor;
-        selesaiColor=activeButtonColor;
-        batalColor=inactiveButtonColor;
+      if (selesaiColor == inactiveButtonColor) {
+        semuaColor = inactiveButtonColor;
+        prosesColor = inactiveButtonColor;
+        perjalananColor = inactiveButtonColor;
+        selesaiColor = activeButtonColor;
+        batalColor = inactiveButtonColor;
       }
     }
-    if (status=="batal"){
+    if (status == "cancelled") {
       setState(() {
-        statusTerpilih="Batal";
+        statusTerpilih = "cancelled";
       });
-      print("Batal jalan");
-      if (batalColor == inactiveButtonColor){
-        semuaColor=inactiveButtonColor;
-        prosesColor=inactiveButtonColor;
-        perjalananColor=inactiveButtonColor;
-        selesaiColor=inactiveButtonColor;
-        batalColor=activeButtonColor;
+      if (batalColor == inactiveButtonColor) {
+        semuaColor = inactiveButtonColor;
+        prosesColor = inactiveButtonColor;
+        perjalananColor = inactiveButtonColor;
+        selesaiColor = inactiveButtonColor;
+        batalColor = activeButtonColor;
       }
     }
+  }
+
+  get_data() async {
+    Map bodi = {
+      "token": _token,
+      "status": ["processed", "on_pickup", "closed", "cancelled"],
+      "start_date": null,
+      "end_date": null
+    };
+    var body = json.encode(bodi);
+    final response = await http.post(
+      Uri.parse("http://127.0.0.1:8000/api/admin/pickup_orders/get"),
+      body: body,
+    );
+    final data = jsonDecode(response.body);
+    for (i = 0; i < data['pickup_orders']['data'].length; i++) {
+      var tanggal = data['pickup_orders']['data'][i]['created_at'];
+      var idcity = data['pickup_orders']['data'][i]['city_id'];
+      var tanggalpickup = data['pickup_orders']['data'][i]['pickup_date'];
+      setState(() {
+        id.add(data['pickup_orders']['data'][i]['id'].toString());
+        pickup_order_no.add(data['pickup_orders']['data'][i]['pickup_order_no'].toString());
+        address.add(data['pickup_orders']['data'][i]['address']);
+        postal_code.add(data['pickup_orders']['data'][i]['postal_code']);
+        namaKota.add("");
+        get_CityID(idcity, i);
+        pickup_date.add(formatTanggalPickup(tanggalpickup));
+        estimate_volume.add(data['pickup_orders']['data'][i]['estimate_volume'].toString());
+        status.add(data['pickup_orders']['data'][i]['status']);
+        tanggalOrder.add(formatTanggal(tanggal));
+        latitude.add(data['pickup_orders']['data'][i]['latitude'].toString());
+        longitude.add(data['pickup_orders']['data'][i]['longitude'].toString());
+      });
+    }
+    print(pickup_date);
   }
 
   getPref() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     setState(
-      () {},
+      () {
+        _token = preferences.getString("token");
+      },
     );
+    get_data();
   }
 
   @override
@@ -136,15 +192,13 @@ class _HistorisState extends State<Historis> {
     getPref();
   }
 
-
-
   int _selectedNavbar = 1;
 
   DateTime selectedDate1 = DateTime.now();
   DateTime selectedDate2 = DateTime.now();
 
   Future<void> _selectDate1(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
+    final DateTime picked = await showDatePicker(
         context: context,
         initialDate: selectedDate1,
         firstDate: DateTime(2015, 8),
@@ -156,7 +210,7 @@ class _HistorisState extends State<Historis> {
   }
 
   Future<void> _selectDate2(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
+    final DateTime picked = await showDatePicker(
         context: context,
         initialDate: selectedDate2,
         firstDate: DateTime(2015, 8),
@@ -206,17 +260,16 @@ class _HistorisState extends State<Historis> {
                                 backgroundColor: MaterialStateProperty.all(
                                   semuaColor,
                                 ),
-                                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                                shape: MaterialStateProperty.all<
+                                        RoundedRectangleBorder>(
                                     RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10.0),
-                                    )
-                                )
-                            ),
+                                  borderRadius: BorderRadius.circular(10.0),
+                                ))),
                           ),
                           TextButton(
                             onPressed: () {
                               setState(() {
-                                updateButtonStyle("proses");
+                                updateButtonStyle("processed");
                               });
                             },
                             child: Text("Proses"),
@@ -224,17 +277,16 @@ class _HistorisState extends State<Historis> {
                                 backgroundColor: MaterialStateProperty.all(
                                   prosesColor,
                                 ),
-                                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                                shape: MaterialStateProperty.all<
+                                        RoundedRectangleBorder>(
                                     RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10.0),
-                                    )
-                                )
-                            ),
+                                  borderRadius: BorderRadius.circular(10.0),
+                                ))),
                           ),
                           TextButton(
                             onPressed: () {
                               setState(() {
-                                updateButtonStyle("perjalanan");
+                                updateButtonStyle("on_pickup");
                               });
                             },
                             child: Text("Dalam Perjalanan"),
@@ -242,17 +294,16 @@ class _HistorisState extends State<Historis> {
                                 backgroundColor: MaterialStateProperty.all(
                                   perjalananColor,
                                 ),
-                                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                                shape: MaterialStateProperty.all<
+                                        RoundedRectangleBorder>(
                                     RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10.0),
-                                    )
-                                )
-                            ),
+                                  borderRadius: BorderRadius.circular(10.0),
+                                ))),
                           ),
                           TextButton(
                             onPressed: () {
                               setState(() {
-                                updateButtonStyle("selesai");
+                                updateButtonStyle("closed");
                               });
                             },
                             child: Text("Selesai"),
@@ -260,17 +311,16 @@ class _HistorisState extends State<Historis> {
                                 backgroundColor: MaterialStateProperty.all(
                                   selesaiColor,
                                 ),
-                                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                                shape: MaterialStateProperty.all<
+                                        RoundedRectangleBorder>(
                                     RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10.0),
-                                    )
-                                )
-                            ),
+                                  borderRadius: BorderRadius.circular(10.0),
+                                ))),
                           ),
                           TextButton(
                             onPressed: () {
                               setState(() {
-                                updateButtonStyle("batal");
+                                updateButtonStyle("cancelled");
                               });
                             },
                             child: Text("Batal"),
@@ -278,12 +328,11 @@ class _HistorisState extends State<Historis> {
                                 backgroundColor: MaterialStateProperty.all(
                                   batalColor,
                                 ),
-                                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                                shape: MaterialStateProperty.all<
+                                        RoundedRectangleBorder>(
                                     RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10.0),
-                                    )
-                                )
-                            ),
+                                  borderRadius: BorderRadius.circular(10.0),
+                                ))),
                           ),
                         ],
                       ),
@@ -295,24 +344,29 @@ class _HistorisState extends State<Historis> {
                         child: SingleChildScrollView(
                           child: Column(
                             children: [
-                              for (var i = 0; i < orderid.length; i++)
-                                if(status[i].toString()==statusTerpilih)
+                              for (var i = 0; i < pickup_order_no.length; i++)
+                                if (status[i] == statusTerpilih)
                                   RC_Historis(
-                                    orderid: orderid[i],
-                                    alamat: alamat[i],
-                                    estimasi: estimasi[i],
+                                    orderid: pickup_order_no[i],
+                                    alamat: address[i],
+                                    tanggalOrder: tanggalOrder[i],
                                     status: status[i],
-                                    volume: volume[i],
-                                    color: Colors.blue,
+                                    volume: estimate_volume[i],
+                                    pickup_date: pickup_date[i],
+                                    latitude: latitude[i],
+                                    longitude: longitude[i],
                                   )
-                              else if(statusTerpilih=="Semua")
+                                else if (statusTerpilih == "Semua" &&
+                                    status[i] != "pending")
                                   RC_Historis(
-                                    orderid: orderid[i],
-                                    alamat: alamat[i],
-                                    estimasi: estimasi[i],
+                                    orderid: pickup_order_no[i],
+                                    alamat: address[i],
+                                    tanggalOrder: tanggalOrder[i],
                                     status: status[i],
-                                    volume: volume[i],
-                                    color: Colors.blue,
+                                    volume: estimate_volume[i],
+                                    pickup_date: pickup_date[i],
+                                    latitude: latitude[i],
+                                    longitude: longitude[i],
                                   )
                               // RC_Historis(orderid: '123-456-333', alamat: 'Jalan Cut Meutia No 1, Jakarta Barat, 11146', estimasi: 'Senin, 1 Agustus 2021', status: 'Selesai', volume: '10', color: Colors.blue,),
                               // RC_Historis(orderid: '123-456-111', alamat: 'Jalan Cut Meutia No 1, Jakarta Barat, 11146', estimasi: 'Senin, 1 Agustus 2021', status: 'Batal', volume: '10', color: Colors.red,),
@@ -405,33 +459,92 @@ class _HistorisState extends State<Historis> {
       ),
     );
   }
+
+  formatTanggal(tanggal) {
+    var datestring = tanggal.toString();
+    DateTime parseDate =
+        new DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").parse(datestring);
+    var inputDate = DateTime.parse(parseDate.toString());
+    var outputFormat = DateFormat("d MMMM yyyy", "id_ID");
+    var outputDate = outputFormat.format(inputDate);
+    return outputDate;
+  }
+
+  formatTanggalPickup(tanggal) {
+    var datestring = tanggal.toString();
+    DateTime parseDate =
+    new DateFormat("yyyy-MM-dd' 'HH:mm:ss").parse(datestring);
+    var inputDate = DateTime.parse(parseDate.toString());
+    var outputFormat = DateFormat("d MMMM yyyy", "id_ID");
+    var outputDate = outputFormat.format(inputDate);
+    return outputDate;
+  }
+
+  get_CityID(idcity, i) async {
+    Map bodi = {
+      "token": _token,
+    };
+    var body = json.encode(bodi);
+    final response = await http.post(
+      Uri.parse("http://127.0.0.1:8000/api/admin/cities/$idcity/get"),
+      body: body,
+    );
+    final data = jsonDecode(response.body);
+    var cityName = data['city']['name'].toString();
+    setState(() {
+      namaKota[i] = cityName;
+    });
+  }
+
+  void refeshData() {
+    setState(() {
+      id.clear();
+      pickup_order_no.clear();
+      address.clear();
+      pickup_date.clear();
+      estimate_volume.clear();
+      namaKota.clear();
+      postal_code.clear();
+      status.clear();
+      tanggalOrder.clear();
+      get_data();
+    });
+  }
 }
 
 class RC_Historis extends StatelessWidget {
   RC_Historis(
-      {required this.orderid,
-      required this.alamat,
-      required this.estimasi,
-      required this.status,
-      required this.volume,
-      required this.color});
+      {this.orderid,
+      this.alamat,
+      this.tanggalOrder,
+      this.status,
+      this.volume,
+      this.pickup_date, this.latitude, this.longitude});
 
-  String orderid, alamat, estimasi, status, volume;
-  Color color;
+  String orderid, alamat, tanggalOrder, status, volume, pickup_date, latitude, longitude;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Navigator.of(context).push(
-            MaterialPageRoute(builder: (context) => Historis_Item_Selesai()));
-      },
+        if(status=="closed"){
+          Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) =>
+                  Historis_Item_Selesai(orderid: orderid)));
+        }else if(status=="cancelled"){
+          Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) =>
+                  Historis_Item_Batal(orderid: orderid)));
+        }
+        else{
+          Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) => DetailPermintaan(orderid: orderid, latitude:latitude, longitude:longitude)));
+        }
+              },
       child: Container(
         margin: EdgeInsets.fromLTRB(30, 5, 30, 5),
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(10)
-        ),
+            color: Colors.white, borderRadius: BorderRadius.circular(10)),
         child: Container(
           margin: EdgeInsets.all(10),
           child: Column(
@@ -439,11 +552,14 @@ class RC_Historis extends StatelessWidget {
             children: [
               Container(
                 width: double.infinity,
-                padding:
-                    EdgeInsets.only(top: 10, bottom: 10,),
+                padding: EdgeInsets.only(
+                  top: 10,
+                  bottom: 10,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(10.0)),
+                  borderRadius:
+                      BorderRadius.vertical(top: Radius.circular(10.0)),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -457,7 +573,7 @@ class RC_Historis extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      '21 November 2021',
+                      tanggalOrder,
                       style: TextStyle(
                         fontSize: 12,
                         color: Colors.black,
@@ -495,7 +611,7 @@ class RC_Historis extends StatelessWidget {
                 ),
               ),
               Text(
-                estimasi,
+                pickup_date,
                 style: TextStyle(
                   fontSize: 12,
                   color: Colors.black,
@@ -529,65 +645,73 @@ class RC_Historis extends StatelessWidget {
                       ),
                     ],
                   ),
-                  if (status == 'Selesai')
-                    TextButton(
-                    onPressed: () {},
-                    child: Text("Selesai", style: TextStyle(color: Colors.green),),
-                    style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all(
-                          Color(0xffECF8ED),
-                        ),
-                        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                            RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10.0),
-                            )
-                        )
-                    ),
-                  ),
-                  if (status == 'Batal')
-                    TextButton(
-                    onPressed: () {},
-                    child: Text("Batal", style: TextStyle(color: Colors.red),),
-                    style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all(
-                          Color(0xffFBE8E8),
-                        ),
-                        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                            RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10.0),
-                            )
-                        )
-                    ),
-                  ),
-                  if (status == 'Proses')
+                  if (status == 'closed')
                     TextButton(
                       onPressed: () {},
-                      child: Text("Proses", style: TextStyle(color: Colors.blueAccent),),
+                      child: Text(
+                        "Selesai",
+                        style: TextStyle(color: Colors.green),
+                      ),
+                      style: ButtonStyle(
+                          backgroundColor: MaterialStateProperty.all(
+                            Color(0xffECF8ED),
+                          ),
+                          shape:
+                              MaterialStateProperty.all<RoundedRectangleBorder>(
+                                  RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10.0),
+                          ))),
+                    ),
+                  if (status == 'cancelled')
+                    TextButton(
+                      onPressed: () {},
+                      child: Text(
+                        "Batal",
+                        style: TextStyle(color: Colors.red),
+                      ),
+                      style: ButtonStyle(
+                          backgroundColor: MaterialStateProperty.all(
+                            Color(0xffFBE8E8),
+                          ),
+                          shape:
+                              MaterialStateProperty.all<RoundedRectangleBorder>(
+                                  RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10.0),
+                          ))),
+                    ),
+                  if (status == 'processed')
+                    TextButton(
+                      onPressed: () {},
+                      child: Text(
+                        "Proses",
+                        style: TextStyle(color: Colors.blueAccent),
+                      ),
                       style: ButtonStyle(
                           backgroundColor: MaterialStateProperty.all(
                             Color(0xffE7EEF4),
                           ),
-                          shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                              RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10.0),
-                              )
-                          )
-                      ),
+                          shape:
+                              MaterialStateProperty.all<RoundedRectangleBorder>(
+                                  RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10.0),
+                          ))),
                     ),
-                  if (status == 'Dalam Perjalanan')
+                  if (status == 'on_pickup')
                     TextButton(
                       onPressed: () {},
-                      child: Text("Dalam Perjalanan", style: TextStyle(color: Colors.orange),),
+                      child: Text(
+                        "Dalam Perjalanan",
+                        style: TextStyle(color: Colors.orange),
+                      ),
                       style: ButtonStyle(
                           backgroundColor: MaterialStateProperty.all(
                             Color(0xffFEF5E8),
                           ),
-                          shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                              RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10.0),
-                              )
-                          )
-                      ),
+                          shape:
+                              MaterialStateProperty.all<RoundedRectangleBorder>(
+                                  RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10.0),
+                          ))),
                     ),
                 ],
               ),

@@ -13,9 +13,9 @@ import 'package:jelantah/screens/historis_item_map.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class DetailPermintaan extends StatefulWidget {
-  final String orderid;
+  final String orderid, latitude, longitude;
 
-  DetailPermintaan({ Key key, String this.orderid})
+  DetailPermintaan({ Key key, String this.orderid, String this.latitude, String this.longitude})
       : super(key: key);
 
   @override
@@ -24,8 +24,7 @@ class DetailPermintaan extends StatefulWidget {
 
 class _DetailPermintaanState extends State<DetailPermintaan> {
   final Set<Marker> _markers = {};
-  final LatLng _currentPosition =
-      LatLng(-6.1874211698185695, 106.83344419697433);
+
 
   var id="";
   var pickup_order_no="";
@@ -37,9 +36,12 @@ class _DetailPermintaanState extends State<DetailPermintaan> {
   var driver_id="";
   var postal_code="";
   var namaKota="";
+  var latitude=0.0;
+  var longitude=0.0;
   var _token;
   var i;
 
+  //var _currentPosition = LatLng(latitude, longitude);
 
   formatTanggal(tanggal) {
     var datestring = tanggal.toString();
@@ -64,19 +66,35 @@ class _DetailPermintaanState extends State<DetailPermintaan> {
     final data = jsonDecode(response.body);
     var tanggal = data['pickup_orders']['created_at'];
     var idcity = data['pickup_orders']['city_id'];
+    var tanggalpickup = data['pickup_orders']['pickup_date'];
+    var idDriver = data['pickup_orders']['driver_id'];
     setState(() {
       id = data['pickup_orders']['id'].toString();
       pickup_order_no = data['pickup_orders']['pickup_order_no'].toString();
       address = data['pickup_orders']['address'];
       get_CityID(idcity);
-      pickup_date = "-";
-      driver_id = "-";
+      if(data['pickup_orders']['pickup_date']==null){
+        pickup_date = "-";
+      }else{
+        pickup_date = formatTanggalPickup(tanggalpickup);
+      }
+      if(data['pickup_orders']['driver_id']==null){
+        driver_id = "-";
+      }else{
+        namaDriver(idDriver);
+      }
       postal_code = data['pickup_orders']['postal_code'];
       estimate_volume = data['pickup_orders']['estimate_volume'].toString();
       status = data['pickup_orders']['status'];
+      var latitudes = data['pickup_orders']['latitude'].toString();
+      latitude = double.parse(latitudes);
+      var longitudes = data['pickup_orders']['longitude'].toString();
+      longitude = double.parse(longitudes);
       tanggalOrder = formatTanggal(tanggal);
     });
     print(data);
+    // print(latitude);
+    // print(longitude);
   }
 
   getPref() async {
@@ -88,19 +106,19 @@ class _DetailPermintaanState extends State<DetailPermintaan> {
       },
     );
     get_data();
+    _markers.add(
+      Marker(
+        markerId: MarkerId("$latitude, $longitude"),
+        position: LatLng(double.parse(widget.latitude), double.parse(widget.longitude)),
+        icon: BitmapDescriptor.defaultMarker,
+      ),
+    );
   }
 
   @override
   void initState() {
     super.initState();
     getPref();
-    _markers.add(
-      Marker(
-        markerId: MarkerId("-6.1874211698185695, 106.83344419697433"),
-        position: _currentPosition,
-        icon: BitmapDescriptor.defaultMarker,
-      ),
-    );
   }
 
   @override
@@ -142,9 +160,9 @@ class _DetailPermintaanState extends State<DetailPermintaan> {
                       children: [
                         Expanded(
                           child: GoogleMap(
-                            mapType: MapType.normal,
+                            mapType: MapType.terrain,
                             initialCameraPosition: CameraPosition(
-                              target: _currentPosition,
+                              target: LatLng(double.parse(widget.latitude), double.parse(widget.longitude)),
                               zoom: 18.0,
                             ),
                             markers: _markers,
@@ -298,6 +316,23 @@ class _DetailPermintaanState extends State<DetailPermintaan> {
                                                   BorderRadius.circular(10.0),
                                             ))),
                                       ),
+                                    if (status == 'processed')
+                                      TextButton(
+                                        onPressed: () {},
+                                        child: Text(
+                                          "Proses",
+                                          style: TextStyle(color: Colors.blueAccent),
+                                        ),
+                                        style: ButtonStyle(
+                                            backgroundColor: MaterialStateProperty.all(
+                                              Color(0xffE7EEF4),
+                                            ),
+                                            shape:
+                                            MaterialStateProperty.all<RoundedRectangleBorder>(
+                                                RoundedRectangleBorder(
+                                                  borderRadius: BorderRadius.circular(10.0),
+                                                ))),
+                                      ),
                                   ],
                                 ),
                                 SizedBox(height: 30,),
@@ -347,5 +382,34 @@ class _DetailPermintaanState extends State<DetailPermintaan> {
       namaKota=cityName;
     });
     print(cityName);
+  }
+
+  formatTanggalPickup(tanggal) {
+    var datestring = tanggal.toString();
+    DateTime parseDate =
+    new DateFormat("yyyy-MM-dd' 'HH:mm:ss").parse(datestring);
+    var inputDate = DateTime.parse(parseDate.toString());
+    var outputFormat = DateFormat("d MMMM yyyy", "id_ID");
+    var outputDate = outputFormat.format(inputDate);
+    return outputDate;
+  }
+
+  namaDriver(idDriver) async {
+    Map bodi = {
+      "token": _token,
+    };
+    var body = json.encode(bodi);
+    final response = await http.post(
+      Uri.parse("http://127.0.0.1:8000/api/admin/drivers/$idDriver/get"),
+      body: body,
+    );
+    final data = jsonDecode(response.body);
+    var first_name = data['user']['first_name'];
+    var last_name = data['user']['last_name'];
+    var phone_number = data['user']['phone_number'];
+    var dataDriver = first_name+" "+last_name+" "+"("+phone_number+")";
+    setState(() {
+      driver_id = dataDriver;
+    });
   }
 }
