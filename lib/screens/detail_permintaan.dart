@@ -4,6 +4,9 @@ import 'dart:core';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_icons/flutter_icons.dart';
+import 'package:jelantah/screens/historis.dart';
+import 'package:jelantah/screens/permintaan_penjemputan.dart';
 import 'package:jelantah/screens/ubah_permintaan.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:jelantah/screens/historis_item.dart';
@@ -15,7 +18,11 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 class DetailPermintaan extends StatefulWidget {
   final String orderid, latitude, longitude;
 
-  DetailPermintaan({ Key key, String this.orderid, String this.latitude, String this.longitude})
+  DetailPermintaan(
+      {Key key,
+      String this.orderid,
+      String this.latitude,
+      String this.longitude})
       : super(key: key);
 
   @override
@@ -24,24 +31,75 @@ class DetailPermintaan extends StatefulWidget {
 
 class _DetailPermintaanState extends State<DetailPermintaan> {
   final Set<Marker> _markers = {};
+  final _key = new GlobalKey<FormState>();
 
-
-  var id="";
-  var pickup_order_no="";
-  var address="";
-  var pickup_date="";
-  var estimate_volume="";
-  var status="";
-  var tanggalOrder="";
-  var driver_id="";
-  var postal_code="";
-  var namaKota="";
-  var latitude=0.0;
-  var longitude=0.0;
+  var id = "";
+  var pickup_order_no = "";
+  var address = "";
+  var pickup_date = "";
+  var estimate_volume = "";
+  var status = "";
+  var tanggalOrder = "";
+  var driver_id = "";
+  var postal_code = "";
+  var namaKota = "";
+  var latitude = 0.0;
+  var longitude = 0.0;
   var _token;
   var i;
 
+  String alasan;
+
   //var _currentPosition = LatLng(latitude, longitude);
+
+  check() {
+    print("jalan");
+    final form = _key.currentState;
+    if (form.validate()) {
+      form.save();
+      save();
+    }
+  }
+
+  save() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    _token = preferences.getString("token");
+    var orderid = widget.orderid;
+    var response;
+    if(status=="pending"){
+      Map bodi = {"token": _token, "reject_reason": alasan};
+      var body = json.encode(bodi);
+      response = await http.post(
+        Uri.parse(
+            "http://127.0.0.1:8000/api/admin/pickup_orders/$orderid/reject/post"),
+        body: body,
+      );
+    }else{
+      Map bodi = {"token": _token, "cancel_reason": alasan};
+      var body = json.encode(bodi);
+      response = await http.post(
+        Uri.parse(
+            "http://127.0.0.1:8000/api/admin/pickup_orders/$orderid/cancel/post"),
+        body: body,
+      );
+    }
+    final data = jsonDecode(response.body);
+    String statusjson = data['status'];
+    String message = data['message'];
+    if (statusjson == "success") {
+      setState(() {
+        if(status=="pending"){
+          Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => PermintaanPenjemputan()));
+        }else{
+          Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => Historis()));
+        }
+      });
+    } else {
+      print(message);
+    }
+  }
 
   formatTanggal(tanggal) {
     var datestring = tanggal.toString();
@@ -73,14 +131,14 @@ class _DetailPermintaanState extends State<DetailPermintaan> {
       pickup_order_no = data['pickup_orders']['pickup_order_no'].toString();
       address = data['pickup_orders']['address'];
       get_CityID(idcity);
-      if(data['pickup_orders']['pickup_date']==null){
+      if (data['pickup_orders']['pickup_date'] == null) {
         pickup_date = "-";
-      }else{
+      } else {
         pickup_date = formatTanggalPickup(tanggalpickup);
       }
-      if(data['pickup_orders']['driver_id']==null){
+      if (data['pickup_orders']['driver_id'] == null) {
         driver_id = "-";
-      }else{
+      } else {
         namaDriver(idDriver);
       }
       postal_code = data['pickup_orders']['postal_code'];
@@ -109,7 +167,8 @@ class _DetailPermintaanState extends State<DetailPermintaan> {
     _markers.add(
       Marker(
         markerId: MarkerId("$latitude, $longitude"),
-        position: LatLng(double.parse(widget.latitude), double.parse(widget.longitude)),
+        position: LatLng(
+            double.parse(widget.latitude), double.parse(widget.longitude)),
         icon: BitmapDescriptor.defaultMarker,
       ),
     );
@@ -162,7 +221,8 @@ class _DetailPermintaanState extends State<DetailPermintaan> {
                           child: GoogleMap(
                             mapType: MapType.terrain,
                             initialCameraPosition: CameraPosition(
-                              target: LatLng(double.parse(widget.latitude), double.parse(widget.longitude)),
+                              target: LatLng(double.parse(widget.latitude),
+                                  double.parse(widget.longitude)),
                               zoom: 18.0,
                             ),
                             markers: _markers,
@@ -223,7 +283,11 @@ class _DetailPermintaanState extends State<DetailPermintaan> {
                                   ),
                                 ),
                                 Text(
-                                  address+", "+namaKota+", "+postal_code,
+                                  address +
+                                      ", " +
+                                      namaKota +
+                                      ", " +
+                                      postal_code,
                                   style: TextStyle(
                                     fontSize: 12,
                                     color: Colors.black,
@@ -321,11 +385,31 @@ class _DetailPermintaanState extends State<DetailPermintaan> {
                                         onPressed: () {},
                                         child: Text(
                                           "Proses",
-                                          style: TextStyle(color: Colors.blueAccent),
+                                          style: TextStyle(
+                                              color: Colors.blueAccent),
+                                        ),
+                                        style: ButtonStyle(
+                                            backgroundColor:
+                                                MaterialStateProperty.all(
+                                              Color(0xffE7EEF4),
+                                            ),
+                                            shape: MaterialStateProperty.all<
+                                                    RoundedRectangleBorder>(
+                                                RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(10.0),
+                                            ))),
+                                      ),
+                                    if (status == 'on_pickup')
+                                      TextButton(
+                                        onPressed: () {},
+                                        child: Text(
+                                          "Dalam Perjalanan",
+                                          style: TextStyle(color: Colors.orange),
                                         ),
                                         style: ButtonStyle(
                                             backgroundColor: MaterialStateProperty.all(
-                                              Color(0xffE7EEF4),
+                                              Color(0xffFEF5E8),
                                             ),
                                             shape:
                                             MaterialStateProperty.all<RoundedRectangleBorder>(
@@ -335,23 +419,66 @@ class _DetailPermintaanState extends State<DetailPermintaan> {
                                       ),
                                   ],
                                 ),
-                                SizedBox(height: 30,),
-                                Container(
-                                  height: 50,
-                                  decoration: BoxDecoration(
-                                    color: Color(0xff2f9efc),
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: TextButton(
-                                      onPressed: () {
-                                        Navigator.of(context).push(MaterialPageRoute(
-                                            builder: (context) =>
-                                                UbahPermintaan(pickup_order_no: pickup_order_no, address:address, namaKota:namaKota, postal_code:postal_code, pickup_date:pickup_date, estimate_volume:estimate_volume, tanggalOrder:tanggalOrder, driver_id: driver_id,)));
-
-                                      },
-                                      child: Text('Ubah Data',
-                                          style:
-                                          TextStyle(color: Colors.white))),
+                                SizedBox(
+                                  height: 30,
+                                ),
+                                Row(
+                                  children: [
+                                    Container(
+                                      height: 50,
+                                      decoration: BoxDecoration(
+                                        color: Colors.red,
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      child: TextButton(
+                                        onPressed: () {
+                                          showAlertDialog(context);
+                                        },
+                                        child: Icon(
+                                          FlutterIcons.ban_faw5s,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: 10,
+                                    ),
+                                    Expanded(
+                                      child: Container(
+                                        height: 50,
+                                        decoration: BoxDecoration(
+                                          color: Color(0xff2f9efc),
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                        ),
+                                        child: TextButton(
+                                            onPressed: () {
+                                              Navigator.of(context).push(
+                                                  MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          UbahPermintaan(
+                                                            pickup_order_no:
+                                                                pickup_order_no,
+                                                            address: address,
+                                                            namaKota: namaKota,
+                                                            postal_code:
+                                                                postal_code,
+                                                            pickup_date:
+                                                                pickup_date,
+                                                            estimate_volume:
+                                                                estimate_volume,
+                                                            tanggalOrder:
+                                                                tanggalOrder,
+                                                            driver_id:
+                                                                driver_id,
+                                                          )));
+                                            },
+                                            child: Text('Ubah Data',
+                                                style: TextStyle(
+                                                    color: Colors.white))),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
@@ -379,7 +506,7 @@ class _DetailPermintaanState extends State<DetailPermintaan> {
     final data = jsonDecode(response.body);
     var cityName = data['city']['name'].toString();
     setState(() {
-      namaKota=cityName;
+      namaKota = cityName;
     });
     print(cityName);
   }
@@ -387,7 +514,7 @@ class _DetailPermintaanState extends State<DetailPermintaan> {
   formatTanggalPickup(tanggal) {
     var datestring = tanggal.toString();
     DateTime parseDate =
-    new DateFormat("yyyy-MM-dd' 'HH:mm:ss").parse(datestring);
+        new DateFormat("yyyy-MM-dd' 'HH:mm:ss").parse(datestring);
     var inputDate = DateTime.parse(parseDate.toString());
     var outputFormat = DateFormat("d MMMM yyyy", "id_ID");
     var outputDate = outputFormat.format(inputDate);
@@ -407,9 +534,58 @@ class _DetailPermintaanState extends State<DetailPermintaan> {
     var first_name = data['user']['first_name'];
     var last_name = data['user']['last_name'];
     var phone_number = data['user']['phone_number'];
-    var dataDriver = first_name+" "+last_name+" "+"("+phone_number+")";
+    var dataDriver =
+        first_name + " " + last_name + " " + "(" + phone_number + ")";
     setState(() {
       driver_id = dataDriver;
     });
+  }
+
+  showAlertDialog(BuildContext context) {
+    // set up the buttons
+    Widget cancelButton = TextButton(
+      child: Text("kembali"),
+      onPressed: () {
+        Navigator.pop(context);
+      },
+    );
+    Widget continueButton = TextButton(
+      child: Text("Lanjutkan"),
+      onPressed: () {
+        check();
+      },
+    );
+
+    // set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: Text("Konfirmasi Pembatalan"),
+      content: Form(
+        key: _key,
+        child: TextFormField(
+          validator: (e) {
+            if (e.isEmpty) {
+              return "Masukan alasan pembatalan";
+            }
+          },
+          onSaved: (e) => alasan = e,
+          decoration: InputDecoration(
+            hintText: "Masukan alasan",
+            hintStyle: TextStyle(color: Colors.grey),
+          ),
+        ),
+      ),
+      actions: [
+        cancelButton,
+        continueButton,
+      ],
+    );
+
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
   }
 }

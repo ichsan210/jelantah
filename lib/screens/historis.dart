@@ -164,7 +164,11 @@ class _HistorisState extends State<Historis> {
         postal_code.add(data['pickup_orders']['data'][i]['postal_code']);
         namaKota.add("");
         get_CityID(idcity, i);
-        pickup_date.add(formatTanggalPickup(tanggalpickup));
+        if(tanggalpickup==null){
+          pickup_date.add("-");
+        }else{
+          pickup_date.add(formatTanggalPickup(tanggalpickup));
+        }
         estimate_volume.add(data['pickup_orders']['data'][i]['estimate_volume'].toString());
         status.add(data['pickup_orders']['data'][i]['status']);
         tanggalOrder.add(formatTanggal(tanggal));

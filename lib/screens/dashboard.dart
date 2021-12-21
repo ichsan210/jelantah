@@ -50,8 +50,8 @@ class _DashboardState extends State<Dashboard> {
   String _token;
   var _first_name = "..";
   var _last_name = "..";
-  var _pemasokan = "0";
-  var _pengeluaran = "0";
+  var _pemasokan = 0.0;
+  var _pengeluaran = 0.0;
   var i;
 
   var id = new List();
@@ -86,11 +86,9 @@ class _DashboardState extends State<Dashboard> {
     );
     final data = jsonDecode(response.body);
     print(2);
-    int pengeluaran = data['total_price'];
-    int pemasokan = data['total_weight'];
     setState(() {
-      _pengeluaran = pengeluaran.toString();
-      _pemasokan = pemasokan.toString();
+      _pengeluaran = double.parse(data['total_price'].toString());
+      _pemasokan = double.parse(data['total_weight'].toString());
     });
   }
 
@@ -240,15 +238,6 @@ class _DashboardState extends State<Dashboard> {
                           //     color: Colors.black,
                           //   ),
                           // ),
-                          IconButton(
-                            onPressed: () {
-                              showAlertDialog(context);
-                            },
-                            icon: Icon(
-                              Icons.logout,
-                              color: Colors.black,
-                            ),
-                          )
                         ],
                       )
                     ],
@@ -329,7 +318,7 @@ class _DashboardState extends State<Dashboard> {
                                   ),
                                 ),
                                 Text(
-                                  _pengeluaran,
+                                  _pengeluaran.toString(),
                                   style: TextStyle(
                                     fontSize: 25,
                                     color: Color(0xFF2F9EFC),
@@ -364,7 +353,7 @@ class _DashboardState extends State<Dashboard> {
                             Row(
                               children: [
                                 Text(
-                                  _pemasokan,
+                                  _pemasokan.toString(),
                                   style: TextStyle(
                                     fontSize: 25,
                                     color: Color(0xFF2F9EFC),
