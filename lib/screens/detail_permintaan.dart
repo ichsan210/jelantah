@@ -47,8 +47,11 @@ class _DetailPermintaanState extends State<DetailPermintaan> {
   var longitude = 0.0;
   var _token;
   var i;
+  var phone_number = "";
+  var recipient_name ="";
 
   String alasan;
+
 
   //var _currentPosition = LatLng(latitude, longitude);
 
@@ -142,6 +145,8 @@ class _DetailPermintaanState extends State<DetailPermintaan> {
         namaDriver(idDriver);
       }
       postal_code = data['pickup_orders']['postal_code'];
+      recipient_name = data['pickup_orders']['recipient_name'];
+      phone_number = data['pickup_orders']['phone_number'];
       estimate_volume = data['pickup_orders']['estimate_volume'].toString();
       status = data['pickup_orders']['status'];
       var latitudes = data['pickup_orders']['latitude'].toString();
@@ -273,6 +278,25 @@ class _DetailPermintaanState extends State<DetailPermintaan> {
                                 ),
                                 Container(
                                   child: Divider(color: Colors.blue),
+                                ),
+                                Text(
+                                  'Penerima',
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: Colors.grey,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Text(
+                                  recipient_name+" ("+phone_number+")",
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 10,
                                 ),
                                 Text(
                                   'Alamat',

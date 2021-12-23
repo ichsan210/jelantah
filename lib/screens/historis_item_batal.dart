@@ -28,6 +28,7 @@ class _Historis_Item_BatalState extends State<Historis_Item_Batal> {
   var status="";
   var tanggalOrder="";
   var driver_id="";
+  var user_id="";
   var postal_code="";
   var namaKota="";
   var pemesan="";
@@ -84,6 +85,25 @@ class _Historis_Item_BatalState extends State<Historis_Item_Batal> {
     });
   }
 
+  namaUser(idUser) async {
+    Map bodi = {
+      "token": _token,
+    };
+    var body = json.encode(bodi);
+    final response = await http.post(
+      Uri.parse("http://127.0.0.1:8000/api/admin/users/$idUser/get"),
+      body: body,
+    );
+    final data = jsonDecode(response.body);
+    var first_name = data['user']['first_name'];
+    var last_name = data['user']['last_name'];
+    var email = data['user']['email'];
+    var dataUser = first_name+" "+last_name+" "+"("+email+")";
+    setState(() {
+      user_id = dataUser;
+    });
+  }
+
   formatTanggal(tanggal) {
     var datestring = tanggal.toString();
     DateTime parseDate =
@@ -109,6 +129,7 @@ class _Historis_Item_BatalState extends State<Historis_Item_Batal> {
     var idcity = data['pickup_orders']['city_id'];
     var tanggalpickup = data['pickup_orders']['pickup_date'];
     var idDriver = data['pickup_orders']['driver_id'];
+    var idUser = data['pickup_orders']['user_id'];
     setState(() {
       id = data['pickup_orders']['id'].toString();
       pickup_order_no = data['pickup_orders']['pickup_order_no'].toString();
@@ -126,6 +147,11 @@ class _Historis_Item_BatalState extends State<Historis_Item_Batal> {
         driver_id = "-";
       }else{
         namaDriver(idDriver);
+      }
+      if(data['pickup_orders']['user_id']==null){
+        user_id = "-";
+      }else{
+        namaUser(idUser);
       }
       postal_code = data['pickup_orders']['postal_code'];
       estimate_volume = data['pickup_orders']['estimate_volume'].toString();
@@ -198,31 +224,41 @@ class _Historis_Item_BatalState extends State<Historis_Item_Batal> {
                     children: [
                       Container(
                         width: double.infinity,
-                        padding: EdgeInsets.only(
-                          top: 10,
-                          bottom: 10,
-                        ),
+                        padding: EdgeInsets.all(5),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.vertical(
                               top: Radius.circular(10.0)),
                         ),
-                        child: Row(
-                          mainAxisAlignment:
-                          MainAxisAlignment.spaceBetween,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              'ID ' + pickup_order_no,
-                              style: TextStyle(
-                                fontSize: 15,
-                                color: Colors.black,
-                                fontWeight: FontWeight.bold,
-                              ),
+                            Row(
+                              mainAxisAlignment:
+                              MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'ID ' + pickup_order_no,
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Text(
+                                  tanggalOrder,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
                             ),
                             Text(
-                              tanggalOrder,
+                              user_id,
                               style: TextStyle(
-                                fontSize: 12,
+                                fontSize: 15,
                                 color: Colors.black,
                                 fontWeight: FontWeight.bold,
                               ),

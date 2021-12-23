@@ -141,7 +141,7 @@ class _RegisterUserState extends State<RegisterUser> {
           color: Color.fromRGBO(0, 43, 80, 1), //change your color here
         ),
         title: Text(
-          "Daftar",
+          "Daftar User",
           style: TextStyle(
             fontWeight: FontWeight.bold,
             color: Color.fromRGBO(0, 43, 80, 1),

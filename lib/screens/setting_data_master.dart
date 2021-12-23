@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:jelantah/screens/login_page.dart';
+import 'package:jelantah/screens/master_driver.dart';
 import 'package:jelantah/screens/master_user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:jelantah/screens/master_admin.dart';
@@ -126,6 +127,8 @@ class _SettingDataMasterState extends State<SettingDataMaster> {
                           children: [
                             RawMaterialButton(
                               onPressed: () {
+                                Navigator.of(context).push(MaterialPageRoute(
+                                    builder: (context) => MasterDriver()));
                               },
                               child: Icon(
                                 Icons.arrow_forward,

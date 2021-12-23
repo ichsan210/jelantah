@@ -26,31 +26,6 @@ class Historis extends StatefulWidget {
 }
 
 class _HistorisState extends State<Historis> {
-  // var orderid = ["123-456-781", "123-456-782", "123-456-783", "123-456-784"];
-  // var alamat = [
-  //   "Jalan Cut Meutia No 1, Jakarta Barat, 11146",
-  //   "Jalan Cut Meutia No 1, Jakarta Barat, 11146",
-  //   "Jalan Cut Meutia No 1, Jakarta Barat, 11146",
-  //   "Jalan Cut Meutia No 1, Jakarta Barat, 11146",
-  // ];
-  // var estimasi = [
-  //   "Senin, 22 November 2021",
-  //   "Senin, 22 November 2021",
-  //   "Senin, 22 November 2021",
-  //   "Senin, 22 November 2021",
-  // ];
-  // var status = [
-  //   "Selesai",
-  //   "Batal",
-  //   "Proses",
-  //   "Dalam Perjalanan",
-  // ];
-  // var volume = [
-  //   "10",
-  //   "10",
-  //   "10",
-  //   "10",
-  // ];
 
   Color semuaColor = inactiveButtonColor;
   Color prosesColor = activeButtonColor;
@@ -75,6 +50,7 @@ class _HistorisState extends State<Historis> {
   var tanggalOrder = new List();
   var latitude = new List();
   var longitude = new List();
+  var weighing_volume = new List();
 
   void updateButtonStyle(String status) {
     //refeshData();
@@ -170,6 +146,12 @@ class _HistorisState extends State<Historis> {
           pickup_date.add(formatTanggalPickup(tanggalpickup));
         }
         estimate_volume.add(data['pickup_orders']['data'][i]['estimate_volume'].toString());
+        var check_weighing_volume = data['pickup_orders']['data'][i]['weighing_volume'].toString();
+        if(check_weighing_volume==null){
+          weighing_volume.add("-");
+        }else{
+          weighing_volume.add(check_weighing_volume);
+        }
         status.add(data['pickup_orders']['data'][i]['status']);
         tanggalOrder.add(formatTanggal(tanggal));
         latitude.add(data['pickup_orders']['data'][i]['latitude'].toString());
@@ -356,6 +338,7 @@ class _HistorisState extends State<Historis> {
                                     tanggalOrder: tanggalOrder[i],
                                     status: status[i],
                                     volume: estimate_volume[i],
+                                    volume_real : weighing_volume[i],
                                     pickup_date: pickup_date[i],
                                     latitude: latitude[i],
                                     longitude: longitude[i],
@@ -368,15 +351,11 @@ class _HistorisState extends State<Historis> {
                                     tanggalOrder: tanggalOrder[i],
                                     status: status[i],
                                     volume: estimate_volume[i],
+                                    volume_real : weighing_volume[i],
                                     pickup_date: pickup_date[i],
                                     latitude: latitude[i],
                                     longitude: longitude[i],
-                                  )
-                              // RC_Historis(orderid: '123-456-333', alamat: 'Jalan Cut Meutia No 1, Jakarta Barat, 11146', estimasi: 'Senin, 1 Agustus 2021', status: 'Selesai', volume: '10', color: Colors.blue,),
-                              // RC_Historis(orderid: '123-456-111', alamat: 'Jalan Cut Meutia No 1, Jakarta Barat, 11146', estimasi: 'Senin, 1 Agustus 2021', status: 'Batal', volume: '10', color: Colors.red,),
-                              // RC_Historis(orderid: '123-456-333', alamat: 'Jalan Cut Meutia No 1, Jakarta Barat, 11146', estimasi: 'Senin, 1 Agustus 2021', status: 'Selesai', volume: '10', color: Colors.blue,),
-                              // RC_Historis(orderid: '123-456-333', alamat: 'Jalan Cut Meutia No 1, Jakarta Barat, 11146', estimasi: 'Senin, 1 Agustus 2021', status: 'Selesai', volume: '10', color: Colors.blue,),
-                            ],
+                                  )                            ],
                           ),
                         ),
                       ),
@@ -523,9 +502,9 @@ class RC_Historis extends StatelessWidget {
       this.tanggalOrder,
       this.status,
       this.volume,
-      this.pickup_date, this.latitude, this.longitude});
+      this.pickup_date, this.latitude, this.longitude, this.volume_real});
 
-  String orderid, alamat, tanggalOrder, status, volume, pickup_date, latitude, longitude;
+  String orderid, alamat, tanggalOrder, status, volume, pickup_date, latitude, longitude, volume_real;
 
   @override
   Widget build(BuildContext context) {
@@ -606,7 +585,17 @@ class RC_Historis extends StatelessWidget {
               SizedBox(
                 height: 10,
               ),
-              Text(
+              if(status=="closed")
+                Text(
+                  'Tanggal Penjemputan',
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: Colors.grey,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              if(status!="closed")
+                Text(
                 'Estimasi Penjemputan',
                 style: TextStyle(
                   fontSize: 10,
@@ -628,11 +617,12 @@ class RC_Historis extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
+                  if (status != 'closed')
+                    Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Total Volume',
+                        'Estimasi Total Volume',
                         style: TextStyle(
                           fontSize: 10,
                           color: Colors.grey,
@@ -649,6 +639,28 @@ class RC_Historis extends StatelessWidget {
                       ),
                     ],
                   ),
+                  if (status == 'closed')
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Total Volume Asli',
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: Colors.grey,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          volume_real + ' Liter',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
                   if (status == 'closed')
                     TextButton(
                       onPressed: () {},

@@ -3,8 +3,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_icons/flutter_icons.dart';
+import 'package:jelantah/screens/master_driver_detail.dart';
 import 'package:jelantah/screens/master_user_balance.dart';
 import 'package:jelantah/screens/master_user_detail.dart';
+import 'package:jelantah/screens/registration_driver.dart';
 import 'package:jelantah/screens/registration_user.dart';
 import 'package:jelantah/screens/setting_data_master.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -12,12 +14,12 @@ import 'package:jelantah/screens/register.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-class MasterUser extends StatefulWidget {
+class MasterDriver extends StatefulWidget {
   @override
-  _MasterUserState createState() => _MasterUserState();
+  _MasterDriverState createState() => _MasterDriverState();
 }
 
-class _MasterUserState extends State<MasterUser> {
+class _MasterDriverState extends State<MasterDriver> {
   var _token;
 
   var i;
@@ -26,13 +28,12 @@ class _MasterUserState extends State<MasterUser> {
   var last_name = new List();
   var email = new List();
   var phone_number = new List();
-  var price = new List();
 
   get_data() async {
     Map bodi = {"token": _token};
     var body = json.encode(bodi);
     final response = await http.post(
-      Uri.parse("http://127.0.0.1:8000/api/admin/users/get"),
+      Uri.parse("http://127.0.0.1:8000/api/admin/drivers/get"),
       body: body,
     );
     final data = jsonDecode(response.body);
@@ -43,7 +44,6 @@ class _MasterUserState extends State<MasterUser> {
         last_name.add(data['users'][i]['last_name']);
         email.add(data['users'][i]['email']);
         phone_number.add(data['users'][i]['phone_number']);
-        price.add(data['users'][i]['price']);
       });
     }
   }
@@ -51,7 +51,7 @@ class _MasterUserState extends State<MasterUser> {
   getPref() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     setState(
-      () {
+          () {
         _token = preferences.getString("token");
         // _token = (preferences.getString('token') ?? '');
       },
@@ -87,7 +87,7 @@ class _MasterUserState extends State<MasterUser> {
             ),
             title: Container(
               child: Text(
-                "Data Master User",
+                "Data Master Driver",
                 style: TextStyle(
                   color: Colors.blue, // 3
                 ),
@@ -101,7 +101,7 @@ class _MasterUserState extends State<MasterUser> {
                 child: IconButton(
                   onPressed: () {
                     Navigator.of(context).push(
-                        MaterialPageRoute(builder: (context) => RegisterUser()));
+                        MaterialPageRoute(builder: (context) => RegisterDriver()));
                   },
                   icon: Icon(
                     Icons.add,
@@ -124,7 +124,6 @@ class _MasterUserState extends State<MasterUser> {
                       last_name: last_name[i],
                       email: email[i],
                       phone_number: phone_number[i],
-                      price: price[i],
                     ),
                 ],
               ),
@@ -137,10 +136,10 @@ class _MasterUserState extends State<MasterUser> {
 }
 
 class RC_MasterUser extends StatelessWidget {
-  RC_MasterUser({this.first_name, this.last_name, this.email, this.id, this.phone_number, this.price});
+  RC_MasterUser({this.first_name, this.last_name, this.email, this.id, this.phone_number});
 
   String first_name, last_name, email, phone_number;
-  int id, price;
+  int id;
 
   @override
   Widget build(BuildContext context) {
@@ -192,23 +191,9 @@ class RC_MasterUser extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   GestureDetector(
-                    onTap: () {
-                      Navigator.of(context).push(
-                          MaterialPageRoute(builder: (context) => MasterUserBalance(id:id, first_name:first_name, last_name:last_name)));
-                    },
-                    child: Icon(
-                        FontAwesome5.credit_card,
-                        size: 30.0,
-                        color: Colors.black,
-                    ),
-                  ),
-                  SizedBox(
-                    width: 20,
-                  ),
-                  GestureDetector(
                     onTap: (){
                       Navigator.of(context).push(
-                          MaterialPageRoute(builder: (context) => MasterUserDetail(id:id, first_name:first_name, last_name:last_name, email:email, phone_number:phone_number, price:price)));
+                          MaterialPageRoute(builder: (context) => MasterDriverDetail(id:id, first_name:first_name, last_name:last_name, email:email, phone_number:phone_number,)));
                     },
                     child: Icon(
                       Icons.settings,
@@ -253,7 +238,7 @@ class RC_MasterUser extends StatelessWidget {
         Navigator.push(
           context,
           PageRouteBuilder(
-            pageBuilder: (c, a1, a2) => MasterUser(),
+            pageBuilder: (c, a1, a2) => MasterDriver(),
             transitionsBuilder: (c, anim, a2, child) =>
                 FadeTransition(opacity: anim, child: child),
             transitionDuration: Duration(milliseconds: 300),
@@ -265,7 +250,7 @@ class RC_MasterUser extends StatelessWidget {
     // set up the AlertDialog
     AlertDialog alert = AlertDialog(
       title: Text("Konfirmasi"),
-      content: Text("Hapus user ini?"),
+      content: Text("Hapus driver ini?"),
       actions: [
         cancelButton,
         continueButton,
@@ -288,7 +273,7 @@ class RC_MasterUser extends StatelessWidget {
     Map bodi = {"token": token};
     var body = json.encode(bodi);
     final response = await http.post(
-      Uri.parse("http://127.0.0.1:8000/api/admin/users/$id/delete"),
+      Uri.parse("http://127.0.0.1:8000/api/admin/drivers/$id/delete"),
       body: body,
     );
     final data = jsonDecode(response.body);
