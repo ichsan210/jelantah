@@ -4,7 +4,9 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:jelantah/constants.dart';
 import 'package:jelantah/screens/detail_permintaan.dart';
+import 'package:jelantah/screens/detail_permintaan_perjalanan.dart';
 import 'package:jelantah/screens/historis_item_batal.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:jelantah/screens/historis_item_selesai.dart';
@@ -26,14 +28,13 @@ class Historis extends StatefulWidget {
 }
 
 class _HistorisState extends State<Historis> {
-
-  Color semuaColor = inactiveButtonColor;
-  Color prosesColor = activeButtonColor;
+  Color semuaColor = activeButtonColor;
+  Color prosesColor = inactiveButtonColor;
   Color perjalananColor = inactiveButtonColor;
   Color selesaiColor = inactiveButtonColor;
   Color batalColor = inactiveButtonColor;
 
-  var statusTerpilih = "processed";
+  var statusTerpilih = "Semua";
 
   var _token;
 
@@ -51,6 +52,12 @@ class _HistorisState extends State<Historis> {
   var latitude = new List();
   var longitude = new List();
   var weighing_volume = new List();
+
+  var link_url = new List();
+  var link_label = new List();
+  var link_active = new List();
+
+  bool loading = true;
 
   void updateButtonStyle(String status) {
     //refeshData();
@@ -116,40 +123,69 @@ class _HistorisState extends State<Historis> {
     }
   }
 
+  get_data_page(link_url_pilih) async {
+    await refresh_data();
+    var pesan = await data_api(link_url_pilih);
+    print(pesan);
+  }
+
   get_data() async {
     Map bodi = {
       "token": _token,
-      "status": ["processed", "on_pickup", "closed", "cancelled"],
+      "status": [
+        "processed",
+        "on_pickup",
+        "cancelled",
+        "cancelled_by_driver",
+        "cancelled_by_contributor",
+        "closed"
+      ],
       "start_date": null,
       "end_date": null
     };
     var body = json.encode(bodi);
     final response = await http.post(
-      Uri.parse("http://127.0.0.1:8000/api/admin/pickup_orders/get"),
+      Uri.parse("$kIpAddress/api/admin/pickup_orders/get"),
       body: body,
     );
     final data = jsonDecode(response.body);
+    for (i = 0; i < data['pickup_orders']['links'].length; i++) {
+      setState(() {
+        link_url.add(data['pickup_orders']['links'][i]["url"]);
+        if(data['pickup_orders']['links'][i]["label"]=="&laquo; Previous"){
+          link_label.add("< Previous");
+        }else if (data['pickup_orders']['links'][i]["label"]=="Next &raquo;"){
+          link_label.add("Next >");
+        }else{
+          link_label.add(data['pickup_orders']['links'][i]["label"]);
+        }
+        link_active.add(data['pickup_orders']['links'][i]["active"]);
+      });
+    }
     for (i = 0; i < data['pickup_orders']['data'].length; i++) {
       var tanggal = data['pickup_orders']['data'][i]['created_at'];
       var idcity = data['pickup_orders']['data'][i]['city_id'];
       var tanggalpickup = data['pickup_orders']['data'][i]['pickup_date'];
       setState(() {
         id.add(data['pickup_orders']['data'][i]['id'].toString());
-        pickup_order_no.add(data['pickup_orders']['data'][i]['pickup_order_no'].toString());
+        pickup_order_no.add(
+            data['pickup_orders']['data'][i]['pickup_order_no'].toString());
         address.add(data['pickup_orders']['data'][i]['address']);
         postal_code.add(data['pickup_orders']['data'][i]['postal_code']);
         namaKota.add("");
         get_CityID(idcity, i);
-        if(tanggalpickup==null){
+        if (tanggalpickup == null) {
           pickup_date.add("-");
-        }else{
+        } else {
           pickup_date.add(formatTanggalPickup(tanggalpickup));
         }
-        estimate_volume.add(data['pickup_orders']['data'][i]['estimate_volume'].toString());
-        var check_weighing_volume = data['pickup_orders']['data'][i]['weighing_volume'].toString();
-        if(check_weighing_volume==null){
+        estimate_volume.add(
+            data['pickup_orders']['data'][i]['estimate_volume'].toString());
+        var check_weighing_volume =
+            data['pickup_orders']['data'][i]['weighing_volume'].toString();
+        if (check_weighing_volume == null) {
           weighing_volume.add("-");
-        }else{
+        } else {
           weighing_volume.add(check_weighing_volume);
         }
         status.add(data['pickup_orders']['data'][i]['status']);
@@ -158,7 +194,7 @@ class _HistorisState extends State<Historis> {
         longitude.add(data['pickup_orders']['data'][i]['longitude'].toString());
       });
     }
-    print(pickup_date);
+    print(status);
   }
 
   getPref() async {
@@ -169,6 +205,7 @@ class _HistorisState extends State<Historis> {
       },
     );
     get_data();
+    setState((){ loading = false; });
   }
 
   @override
@@ -209,6 +246,91 @@ class _HistorisState extends State<Historis> {
 
   @override
   Widget build(BuildContext context) {
+    if(loading) return Scaffold(
+        appBar: AppBar(
+            title: Text(
+              "Riwayat",
+              style: TextStyle(
+                color: Colors.blue, // 3
+              ),
+            ),
+            automaticallyImplyLeading: false,
+            backgroundColor: Colors.white,
+            elevation: 0),body: Center(child: CircularProgressIndicator()),bottomNavigationBar: BottomNavigationBar(
+      type: BottomNavigationBarType.fixed,
+      items: const <BottomNavigationBarItem>[
+        BottomNavigationBarItem(
+          icon: Icon(Icons.home_outlined),
+          title: Text('Beranda'),
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(FlutterIcons.file_text_o_faw),
+          title: Text('Riwayat'),
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.chat_outlined),
+          title: Text('Pesan'),
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.person_outline),
+          title: Text('Profil'),
+        ),
+      ],
+      currentIndex: _selectedNavbar,
+      selectedItemColor: Colors.blue,
+      unselectedItemColor: Colors.blueGrey,
+      showUnselectedLabels: true,
+      onTap: (index) {
+        switch (index) {
+          case 0:
+            Navigator.push(
+              context,
+              PageRouteBuilder(
+                pageBuilder: (c, a1, a2) => LoginPage(),
+                transitionsBuilder: (c, anim, a2, child) =>
+                    FadeTransition(opacity: anim, child: child),
+                transitionDuration: Duration(milliseconds: 200),
+              ),
+            );
+            break;
+          case 1:
+            Navigator.push(
+              context,
+              PageRouteBuilder(
+                pageBuilder: (c, a1, a2) => Historis(),
+                transitionsBuilder: (c, anim, a2, child) =>
+                    FadeTransition(opacity: anim, child: child),
+                transitionDuration: Duration(milliseconds: 300),
+              ),
+            );
+            break;
+          case 2:
+            Navigator.push(
+              context,
+              PageRouteBuilder(
+                pageBuilder: (c, a1, a2) => ChatList(),
+                transitionsBuilder: (c, anim, a2, child) =>
+                    FadeTransition(opacity: anim, child: child),
+                transitionDuration: Duration(milliseconds: 300),
+              ),
+            );
+            break;
+          case 3:
+            Navigator.push(
+              context,
+              PageRouteBuilder(
+                pageBuilder: (c, a1, a2) => Account(),
+                transitionsBuilder: (c, anim, a2, child) =>
+                    FadeTransition(opacity: anim, child: child),
+                transitionDuration: Duration(milliseconds: 300),
+              ),
+            );
+            break;
+        }
+      },
+    ),);
+
+
     return Center(
       child: Container(
         // width: kIsWeb ? 500.0 : double.infinity,
@@ -331,14 +453,32 @@ class _HistorisState extends State<Historis> {
                           child: Column(
                             children: [
                               for (var i = 0; i < pickup_order_no.length; i++)
-                                if (status[i] == statusTerpilih)
+                                if (status[i] == statusTerpilih &&
+                                    statusTerpilih != "cancelled_by_driver" &&
+                                    statusTerpilih !=
+                                        "cancelled_by_contributor")
                                   RC_Historis(
                                     orderid: pickup_order_no[i],
                                     alamat: address[i],
                                     tanggalOrder: tanggalOrder[i],
                                     status: status[i],
                                     volume: estimate_volume[i],
-                                    volume_real : weighing_volume[i],
+                                    volume_real: weighing_volume[i],
+                                    pickup_date: pickup_date[i],
+                                    latitude: latitude[i],
+                                    longitude: longitude[i],
+                                  )
+                                else if (statusTerpilih == "cancelled" &&
+                                        status[i] == "cancelled_by_driver" ||
+                                    statusTerpilih == "cancelled" &&
+                                        status[i] == "cancelled_by_contributor")
+                                  RC_Historis(
+                                    orderid: pickup_order_no[i],
+                                    alamat: address[i],
+                                    tanggalOrder: tanggalOrder[i],
+                                    status: "cancelled",
+                                    volume: estimate_volume[i],
+                                    volume_real: weighing_volume[i],
                                     pickup_date: pickup_date[i],
                                     latitude: latitude[i],
                                     longitude: longitude[i],
@@ -351,15 +491,30 @@ class _HistorisState extends State<Historis> {
                                     tanggalOrder: tanggalOrder[i],
                                     status: status[i],
                                     volume: estimate_volume[i],
-                                    volume_real : weighing_volume[i],
+                                    volume_real: weighing_volume[i],
                                     pickup_date: pickup_date[i],
                                     latitude: latitude[i],
                                     longitude: longitude[i],
-                                  )                            ],
+                                  )
+                            ],
                           ),
                         ),
                       ),
-                    )
+                    ),
+                    Container(
+                      margin: EdgeInsets.fromLTRB(30, 10, 30, 10),
+                      height: 20,
+                      child: Row(
+                        children: [
+                          for (var i = 0; i < link_label.length; i++)
+                            RC_Pagination(
+                              link_label: link_label[i],
+                              link_active: link_active[i],
+                              link_url: link_url[i],
+                            ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -443,6 +598,131 @@ class _HistorisState extends State<Historis> {
     );
   }
 
+  Container RC_Pagination({link_active, link_label, link_url}) {
+    return Container(
+      margin: EdgeInsets.only(right: 5),
+      child: TextButton(
+        onPressed: () {
+          Future.delayed(const Duration(milliseconds: 3000), () {
+            setState(() {
+              if (link_url != null && link_active != true) {
+                if(isRedundentClick(DateTime.now())){
+                  print('hold on, processing');
+                  return;
+                }
+                setState(() {
+                  loading = true;
+                });
+                get_data_page(link_url);
+              }
+            });
+          });
+        },
+        child: Text(link_label),
+        style: ButtonStyle(
+            backgroundColor: MaterialStateProperty.all(
+              link_active == true ? Color(0xffE7EEF4) : Color(0xffFFFFFF),
+            ),
+            shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10.0),
+            ))),
+      ),
+    );
+  }
+
+  refresh_data() {
+    link_url.clear();
+    link_label.clear();
+    link_active.clear();
+    id.clear();
+    pickup_order_no.clear();
+    address.clear();
+    pickup_date.clear();
+    estimate_volume.clear();
+    namaKota.clear();
+    postal_code.clear();
+    status.clear();
+    tanggalOrder.clear();
+    latitude.clear();
+    longitude.clear();
+    weighing_volume..clear();
+  }
+
+  data_api(link_url_pilih) async {
+    Map bodi = {
+      "token": _token,
+      "status": [
+        "processed",
+        "on_pickup",
+        "cancelled",
+        "cancelled_by_driver",
+        "cancelled_by_contributor",
+        "closed"
+      ],
+      "start_date": null,
+      "end_date": null
+    };
+    var body = json.encode(bodi);
+    final response = await http.post(
+      Uri.parse(link_url_pilih),
+      body: body,
+    );
+    final data = jsonDecode(response.body);
+
+    Future.delayed(const Duration(milliseconds: 2000), () {
+      for (i = 0; i < data['pickup_orders']['links'].length; i++) {
+        setState(() {
+          link_url.add(data['pickup_orders']['links'][i]["url"]);
+          if(data['pickup_orders']['links'][i]["label"]=="&laquo; Previous"){
+            link_label.add("< Previous");
+          }else if (data['pickup_orders']['links'][i]["label"]=="Next &raquo;"){
+            link_label.add("Next >");
+          }else{
+            link_label.add(data['pickup_orders']['links'][i]["label"]);
+          }
+          link_active.add(data['pickup_orders']['links'][i]["active"]);
+        });
+      }
+      for (i = 0; i < data['pickup_orders']['data'].length; i++) {
+        var tanggal = data['pickup_orders']['data'][i]['created_at'];
+        var idcity = data['pickup_orders']['data'][i]['city_id'];
+        var tanggalpickup = data['pickup_orders']['data'][i]['pickup_date'];
+        setState(() {
+          id.add(data['pickup_orders']['data'][i]['id'].toString());
+          pickup_order_no.add(
+              data['pickup_orders']['data'][i]['pickup_order_no'].toString());
+          address.add(data['pickup_orders']['data'][i]['address']);
+          postal_code.add(data['pickup_orders']['data'][i]['postal_code']);
+          namaKota.add("");
+          get_CityID(idcity, i);
+          if (tanggalpickup == null) {
+            pickup_date.add("-");
+          } else {
+            pickup_date.add(formatTanggalPickup(tanggalpickup));
+          }
+          estimate_volume.add(
+              data['pickup_orders']['data'][i]['estimate_volume'].toString());
+          var check_weighing_volume =
+          data['pickup_orders']['data'][i]['weighing_volume'].toString();
+          if (check_weighing_volume == null) {
+            weighing_volume.add("-");
+          } else {
+            weighing_volume.add(check_weighing_volume);
+          }
+          status.add(data['pickup_orders']['data'][i]['status']);
+          tanggalOrder.add(formatTanggal(tanggal));
+          latitude.add(data['pickup_orders']['data'][i]['latitude'].toString());
+          longitude.add(data['pickup_orders']['data'][i]['longitude'].toString());
+        });
+      }
+      setState(() {
+        loading = false;
+      });
+    });
+    return "tes";
+  }
+
   formatTanggal(tanggal) {
     var datestring = tanggal.toString();
     DateTime parseDate =
@@ -456,7 +736,7 @@ class _HistorisState extends State<Historis> {
   formatTanggalPickup(tanggal) {
     var datestring = tanggal.toString();
     DateTime parseDate =
-    new DateFormat("yyyy-MM-dd' 'HH:mm:ss").parse(datestring);
+        new DateFormat("yyyy-MM-dd' 'HH:mm:ss").parse(datestring);
     var inputDate = DateTime.parse(parseDate.toString());
     var outputFormat = DateFormat("d MMMM yyyy", "id_ID");
     var outputDate = outputFormat.format(inputDate);
@@ -469,7 +749,7 @@ class _HistorisState extends State<Historis> {
     };
     var body = json.encode(bodi);
     final response = await http.post(
-      Uri.parse("http://127.0.0.1:8000/api/admin/cities/$idcity/get"),
+      Uri.parse("$kIpAddress/api/admin/cities/$idcity/get"),
       body: body,
     );
     final data = jsonDecode(response.body);
@@ -493,6 +773,24 @@ class _HistorisState extends State<Historis> {
       get_data();
     });
   }
+
+  DateTime loginClickTime;
+
+  bool isRedundentClick(DateTime currentTime){
+    if(loginClickTime==null){
+      loginClickTime = currentTime;
+      print("first click");
+      return false;
+    }
+    print('diff is ${currentTime.difference(loginClickTime).inSeconds}');
+    if(currentTime.difference(loginClickTime).inSeconds<10){//set this difference time in seconds
+      return true;
+    }
+
+    loginClickTime = currentTime;
+    return false;
+  }
+
 }
 
 class RC_Historis extends StatelessWidget {
@@ -502,28 +800,52 @@ class RC_Historis extends StatelessWidget {
       this.tanggalOrder,
       this.status,
       this.volume,
-      this.pickup_date, this.latitude, this.longitude, this.volume_real});
+      this.pickup_date,
+      this.latitude,
+      this.longitude,
+      this.volume_real});
 
-  String orderid, alamat, tanggalOrder, status, volume, pickup_date, latitude, longitude, volume_real;
+  String orderid,
+      alamat,
+      tanggalOrder,
+      status,
+      volume,
+      pickup_date,
+      latitude,
+      longitude,
+      volume_real;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        if(status=="closed"){
+        if (status == "closed") {
           Navigator.of(context).push(MaterialPageRoute(
-              builder: (context) =>
-                  Historis_Item_Selesai(orderid: orderid)));
-        }else if(status=="cancelled"){
+              builder: (context) => Historis_Item_Selesai(orderid: orderid)));
+        } else if (status == "cancelled" ||
+            status == "cancelled_by_driver" ||
+            status == "cancelled_by_contributor") {
           Navigator.of(context).push(MaterialPageRoute(
-              builder: (context) =>
-                  Historis_Item_Batal(orderid: orderid)));
+              builder: (context) => Historis_Item_Batal(orderid: orderid)));
         }
-        else{
+        // else if(status=="cancelled_by_driver"){
+        //   Navigator.of(context).push(MaterialPageRoute(
+        //       builder: (context) =>
+        //           Historis_Item_Batal(orderid: orderid)));
+        // }else if(status=="cancelled_by_contributor"){
+        //   Navigator.of(context).push(MaterialPageRoute(
+        //       builder: (context) =>
+        //           Historis_Item_Batal(orderid: orderid)));
+        // }
+        else if (status == "on_pickup") {
           Navigator.of(context).push(MaterialPageRoute(
-              builder: (context) => DetailPermintaan(orderid: orderid, latitude:latitude, longitude:longitude)));
+              builder: (context) => DetailPermintaanPerjalanan(orderid: orderid, latitude:latitude, longitude:longitude)));
+        } else {
+          Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) => DetailPermintaan(
+                  orderid: orderid, latitude: latitude, longitude: longitude)));
         }
-              },
+      },
       child: Container(
         margin: EdgeInsets.fromLTRB(30, 5, 30, 5),
         decoration: BoxDecoration(
@@ -585,7 +907,7 @@ class RC_Historis extends StatelessWidget {
               SizedBox(
                 height: 10,
               ),
-              if(status=="closed")
+              if (status == "closed")
                 Text(
                   'Tanggal Penjemputan',
                   style: TextStyle(
@@ -594,15 +916,15 @@ class RC_Historis extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-              if(status!="closed")
+              if (status != "closed")
                 Text(
-                'Estimasi Penjemputan',
-                style: TextStyle(
-                  fontSize: 10,
-                  color: Colors.grey,
-                  fontWeight: FontWeight.bold,
+                  'Estimasi Penjemputan',
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: Colors.grey,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
               Text(
                 pickup_date,
                 style: TextStyle(
@@ -619,26 +941,26 @@ class RC_Historis extends StatelessWidget {
                 children: [
                   if (status != 'closed')
                     Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Estimasi Total Volume',
-                        style: TextStyle(
-                          fontSize: 10,
-                          color: Colors.grey,
-                          fontWeight: FontWeight.bold,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Estimasi Total Volume',
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: Colors.grey,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      Text(
-                        volume + ' Liter',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
+                        Text(
+                          volume + ' Liter',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
                   if (status == 'closed')
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -678,7 +1000,9 @@ class RC_Historis extends StatelessWidget {
                             borderRadius: BorderRadius.circular(10.0),
                           ))),
                     ),
-                  if (status == 'cancelled')
+                  if (status == "cancelled" ||
+                      status == "cancelled_by_driver" ||
+                      status == "cancelled_by_contributor")
                     TextButton(
                       onPressed: () {},
                       child: Text(

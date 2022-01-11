@@ -4,8 +4,9 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart'; import 'package:jelantah/constants.dart';
 import 'package:flutter/widgets.dart';
+import 'package:jelantah/screens/tes_marker_map.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:jelantah/screens/permintaan_penjemputan.dart';
 import 'package:jelantah/screens/user_baru.dart';
@@ -22,6 +23,7 @@ import 'package:jelantah/screens/ubah_tutorial.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:jelantah/screens/tutorial.dart';
 import 'package:jelantah/screens/login_page.dart';
+import 'package:jelantah/constants.dart';
 
 class Dashboard extends StatefulWidget {
   final VoidCallback signOut;
@@ -64,7 +66,7 @@ class _DashboardState extends State<Dashboard> {
     Map bodi = {"token": _token};
     var body = json.encode(bodi);
     final response = await http.post(
-      Uri.parse("http://127.0.0.1:8000/api/admin/user/get"),
+      Uri.parse("$kIpAddress/api/admin/user/get"),
       body: body,
     );
     final data = jsonDecode(response.body);
@@ -81,7 +83,7 @@ class _DashboardState extends State<Dashboard> {
     Map bodi = {"token": _token};
     var body = json.encode(bodi);
     final response = await http.post(
-      Uri.parse("http://127.0.0.1:8000/api/admin/dashboard/get"),
+      Uri.parse("$kIpAddress/api/admin/dashboard/get"),
       body: body,
     );
     final data = jsonDecode(response.body);
@@ -96,7 +98,7 @@ class _DashboardState extends State<Dashboard> {
     Map bodi = {"token": _token, "video_category_id":1};
     var body = json.encode(bodi);
     final response = await http.post(
-      Uri.parse("http://127.0.0.1:8000/api/admin/videos/get"),
+      Uri.parse("$kIpAddress/api/admin/videos/get"),
       body: body,
     );
     final data = jsonDecode(response.body);
@@ -228,6 +230,16 @@ class _DashboardState extends State<Dashboard> {
                               color: Colors.black,
                             ),
                           ),
+                          // IconButton(
+                          //   onPressed: () {
+                          //     Navigator.of(context).push(MaterialPageRoute(
+                          //         builder: (context) => MyAppMap()));
+                          //   },
+                          //   icon: Icon(
+                          //     FlutterIcons.map_faw5,
+                          //     color: Colors.black,
+                          //   ),
+                          // )
                           // IconButton(
                           //   onPressed: () {
                           //     Navigator.of(context).push(MaterialPageRoute(

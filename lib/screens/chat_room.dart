@@ -3,7 +3,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart'; import 'package:jelantah/constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:jelantah/screens/login_page.dart';
 import 'package:jelantah/screens/historis.dart';
@@ -12,6 +12,7 @@ import 'package:jelantah/screens/tutorial.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:jelantah/screens/account.dart';
 import 'package:http/http.dart' as http;
+import 'package:jelantah/constants.dart';
 
 class ChatRoom extends StatefulWidget {
   final int id;
@@ -64,7 +65,7 @@ class _ChatRoomState extends State<ChatRoom> {
     };
     var body = json.encode(bodi);
     final response = await http.post(
-      Uri.parse("http://127.0.0.1:8000/api/admin/chats/$iduser/post"),
+      Uri.parse("$kIpAddress/api/admin/chats/$iduser/post"),
       body: body,
     );
     final data = jsonDecode(response.body);
@@ -95,7 +96,7 @@ class _ChatRoomState extends State<ChatRoom> {
     Map bodi = {"token": _token};
     var body = json.encode(bodi);
     final response = await http.post(
-      Uri.parse("http://127.0.0.1:8000/api/admin/chats/$iduser/get"),
+      Uri.parse("$kIpAddress/api/admin/chats/$iduser/get"),
       body: body,
     );
     final data = jsonDecode(response.body);

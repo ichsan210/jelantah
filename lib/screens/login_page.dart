@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart'; import 'package:jelantah/constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'register.dart';
 import 'dashboard.dart';
@@ -39,7 +39,7 @@ class _LoginPageState extends State<LoginPage> {
       "email":email, "password":password
     };
     var body = json.encode(bodi);
-    final response = await http.post(Uri.parse("http://127.0.0.1:8000/api/admin/session/post"),
+    final response = await http.post(Uri.parse("$kIpAddress/api/admin/session/post"),
         body: body);
     final data = jsonDecode(response.body);
     String status = data['status'];
@@ -116,7 +116,7 @@ class _LoginPageState extends State<LoginPage> {
                         decoration: BoxDecoration(
                           image: DecorationImage(
                             image: AssetImage("assets/images/mobil.PNG"),
-                            fit: BoxFit.cover,
+                            fit: BoxFit.fill
                           ),
                         ),
                       ),
@@ -205,9 +205,9 @@ class _LoginPageState extends State<LoginPage> {
                                                 Text("Belum punya akun? ", style: TextStyle(color: Colors.grey, fontSize: 16), ),
                                                 GestureDetector(
                                                   onTap: (){
-                                                    Navigator.of(context).push(MaterialPageRoute(
-                                                        builder: (context) =>
-                                                            Register()));
+                                                    // Navigator.of(context).push(MaterialPageRoute(
+                                                    //     builder: (context) =>
+                                                    //         Register()));
                                                   },
                                                     child: Text("Daftar", style: TextStyle(color: Colors.blue, fontSize: 16), )),
                                               ],

@@ -2,7 +2,7 @@
 import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart'; import 'package:jelantah/constants.dart';
 import 'package:jelantah/screens/chat_room.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:jelantah/screens/login_page.dart';
@@ -12,6 +12,7 @@ import 'package:jelantah/screens/tutorial.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:jelantah/screens/account.dart';
 import 'package:http/http.dart' as http;
+import 'package:jelantah/constants.dart';
 
 class ChatList extends StatefulWidget {
   @override
@@ -55,7 +56,7 @@ class _ChatListState extends State<ChatList> {
     Map bodi = {"token": _token};
     var body = json.encode(bodi);
     final response = await http.post(
-      Uri.parse("http://127.0.0.1:8000/api/admin/chats/get"),
+      Uri.parse("$kIpAddress/api/admin/chats/get"),
       body: body,
     );
     final data = jsonDecode(response.body);

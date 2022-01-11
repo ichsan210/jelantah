@@ -1,6 +1,6 @@
 // @dart=2.9
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart'; import 'package:jelantah/constants.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:jelantah/screens/master_user_balance.dart';
@@ -32,7 +32,7 @@ class _MasterUserState extends State<MasterUser> {
     Map bodi = {"token": _token};
     var body = json.encode(bodi);
     final response = await http.post(
-      Uri.parse("http://127.0.0.1:8000/api/admin/users/get"),
+      Uri.parse("$kIpAddress/api/admin/users/get"),
       body: body,
     );
     final data = jsonDecode(response.body);
@@ -288,7 +288,7 @@ class RC_MasterUser extends StatelessWidget {
     Map bodi = {"token": token};
     var body = json.encode(bodi);
     final response = await http.post(
-      Uri.parse("http://127.0.0.1:8000/api/admin/users/$id/delete"),
+      Uri.parse("$kIpAddress/api/admin/users/$id/delete"),
       body: body,
     );
     final data = jsonDecode(response.body);

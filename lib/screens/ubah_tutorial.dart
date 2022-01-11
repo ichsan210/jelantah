@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart'; import 'package:jelantah/constants.dart';
 import 'package:jelantah/screens/tutorial.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
@@ -270,7 +270,7 @@ class _UbahTutorialState extends State<UbahTutorial> {
     };
     var body = json.encode(bodi);
     final response = await http.post(
-      Uri.parse("http://127.0.0.1:8000/api/admin/videos/$id/put"),
+      Uri.parse("$kIpAddress/api/admin/videos/$id/put"),
       body: body,
     );
     final data = jsonDecode(response.body);
@@ -332,7 +332,7 @@ class _UbahTutorialState extends State<UbahTutorial> {
     };
     var body = json.encode(bodi);
     final response = await http.post(
-      Uri.parse("http://127.0.0.1:8000/api/admin/videos/$id/delete"),
+      Uri.parse("$kIpAddress/api/admin/videos/$id/delete"),
       body: body,
     );
     final data = jsonDecode(response.body);

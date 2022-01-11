@@ -5,6 +5,7 @@ import 'dart:core';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:jelantah/constants.dart';
 import 'package:jelantah/screens/detail_permintaan.dart';
 import 'package:jelantah/screens/login_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -19,6 +20,7 @@ class PermintaanPenjemputan extends StatefulWidget {
 }
 
 class _PermintaanPenjemputanState extends State<PermintaanPenjemputan> {
+
   var orderid = ["123-456-789", "123-456-789", "123-456-789", "123-456-789"];
   var alamat = [
     "Jalan Cut Meutia No 1, Jakarta Barat, 11146",
@@ -52,6 +54,12 @@ class _PermintaanPenjemputanState extends State<PermintaanPenjemputan> {
   // late String _kotaterpilih, _statusterpilih;
 
   DateTime selectedDate1 = DateTime.now();
+
+  var link_url = new List();
+  var link_label = new List();
+  var link_active = new List();
+
+  bool loading = true;
 
   Future<void> _selectDate1(BuildContext context) async {
     final DateTime picked = await showDatePicker(
@@ -90,10 +98,23 @@ class _PermintaanPenjemputanState extends State<PermintaanPenjemputan> {
     };
     var body = json.encode(bodi);
     final response = await http.post(
-      Uri.parse("http://127.0.0.1:8000/api/admin/pickup_orders/get"),
+      Uri.parse("$kIpAddress/api/admin/pickup_orders/get"),
       body: body,
     );
     final data = jsonDecode(response.body);
+    for (i = 0; i < data['pickup_orders']['links'].length; i++) {
+      setState(() {
+        link_url.add(data['pickup_orders']['links'][i]["url"]);
+        if(data['pickup_orders']['links'][i]["label"]=="&laquo; Previous"){
+          link_label.add("< Previous");
+        }else if (data['pickup_orders']['links'][i]["label"]=="Next &raquo;"){
+          link_label.add("Next >");
+        }else{
+          link_label.add(data['pickup_orders']['links'][i]["label"]);
+        }
+        link_active.add(data['pickup_orders']['links'][i]["active"]);
+      });
+    }
     for (i = 0; i < data['pickup_orders']['data'].length; i++) {
       var tanggal = data['pickup_orders']['data'][i]['created_at'];
       var idcity = data['pickup_orders']['data'][i]['city_id'];
@@ -106,13 +127,20 @@ class _PermintaanPenjemputanState extends State<PermintaanPenjemputan> {
         namaKota.add("");
         get_CityID(idcity, i);
         pickup_date.add("-");
-        estimate_volume.add(data['pickup_orders']['data'][i]['estimate_volume'].toString());
+        estimate_volume.add(
+            data['pickup_orders']['data'][i]['estimate_volume'].toString());
         status.add(data['pickup_orders']['data'][i]['status']);
         tanggalOrder.add(formatTanggal(tanggal));
         latitude.add(data['pickup_orders']['data'][i]['latitude'].toString());
         longitude.add(data['pickup_orders']['data'][i]['longitude'].toString());
       });
     }
+  }
+
+  get_data_page(link_url_pilih) async{
+    await refresh_data();
+    var pesan = await data_api(link_url_pilih);
+    print(pesan);
   }
 
   getPref() async {
@@ -124,6 +152,7 @@ class _PermintaanPenjemputanState extends State<PermintaanPenjemputan> {
       },
     );
     get_data();
+    setState((){ loading = false; });
   }
 
   @override
@@ -155,6 +184,29 @@ class _PermintaanPenjemputanState extends State<PermintaanPenjemputan> {
 
   @override
   Widget build(BuildContext context) {
+    if(loading) return Scaffold(
+        appBar: AppBar(
+            titleSpacing: 0,
+            leading: IconButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => LoginPage()));
+              },
+              color: Colors.blue,
+              icon: Icon(
+                Icons.keyboard_arrow_left,
+                size: 30,
+              ),
+            ),
+            title: Text(
+              "Permintaan Penjemputan",
+              style: TextStyle(
+                color: Colors.blue, // 3
+              ),
+            ),
+            backgroundColor: Colors.transparent,
+            elevation: 0.0),body: Center(child: CircularProgressIndicator()));
+
     return Center(
       child: Container(
         // width: kIsWeb ? 500.0 : double.infinity,
@@ -163,8 +215,8 @@ class _PermintaanPenjemputanState extends State<PermintaanPenjemputan> {
               titleSpacing: 0,
               leading: IconButton(
                 onPressed: () {
-                  Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => LoginPage()));
+                  Navigator.of(context).push(
+                      MaterialPageRoute(builder: (context) => LoginPage()));
                 },
                 color: Colors.blue,
                 icon: Icon(
@@ -210,12 +262,57 @@ class _PermintaanPenjemputanState extends State<PermintaanPenjemputan> {
                         ),
                       ),
                     ),
-                  )
+                  ),
+                  Container(
+                    margin: EdgeInsets.fromLTRB(30, 10, 30, 10),
+                    height: 20,
+                    child: Row(
+                      children: [
+                        for (var i = 0; i < link_label.length; i++)
+                          RC_Pagination(
+                            link_label: link_label[i],
+                            link_active: link_active[i],
+                            link_url: link_url[i],
+                          ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Container RC_Pagination({link_active, link_label, link_url}) {
+    return Container(
+      margin: EdgeInsets.only(right: 5),
+      child: TextButton(
+        onPressed: () {
+          Future.delayed(const Duration(milliseconds: 2000), () {
+            if(isRedundentClick(DateTime.now())){
+              print('hold on, processing');
+              return;
+            }
+            setState(() {
+              if (link_url != null && link_active != true) {
+                setState((){ loading = true; });
+                get_data_page(link_url);
+              }
+            });
+          });
+        },
+        child: Text(link_label),
+        style: ButtonStyle(
+            backgroundColor: MaterialStateProperty.all(
+              link_active == true ? Color(0xffE7EEF4) : Color(0xffFFFFFF),
+            ),
+            shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10.0),
+            ))),
       ),
     );
   }
@@ -271,14 +368,102 @@ class _PermintaanPenjemputanState extends State<PermintaanPenjemputan> {
     };
     var body = json.encode(bodi);
     final response = await http.post(
-      Uri.parse("http://127.0.0.1:8000/api/admin/cities/$idcity/get"),
+      Uri.parse("$kIpAddress/api/admin/cities/$idcity/get"),
       body: body,
     );
     final data = jsonDecode(response.body);
     var cityName = data['city']['name'].toString();
     setState(() {
-      namaKota[i]=cityName;
+      namaKota[i] = cityName;
     });
+  }
+
+  refresh_data() {
+    link_url.clear();
+    link_label.clear();
+    link_active.clear();
+    id.clear();
+    pickup_order_no.clear();
+    address.clear();
+    pickup_date.clear();
+    estimate_volume.clear();
+    namaKota.clear();
+    postal_code.clear();
+    status.clear();
+    tanggalOrder.clear();
+    latitude.clear();
+    longitude.clear();
+  }
+
+  data_api(link_url_pilih) async{
+    Map bodi = {
+      "token": _token,
+      "status": ["pending", "change_date"],
+      "start_date": null,
+      "end_date": null
+    };
+    var body = json.encode(bodi);
+    final response = await http.post(
+      Uri.parse(link_url_pilih),
+      body: body,
+    );
+    final data = jsonDecode(response.body);
+
+    Future.delayed(const Duration(milliseconds: 3000), () {
+    for (i = 0; i < data['pickup_orders']['links'].length; i++) {
+      setState(() {
+        link_url.add(data['pickup_orders']['links'][i]["url"]);
+        if(data['pickup_orders']['links'][i]["label"]=="&laquo; Previous"){
+          link_label.add("< Previous");
+        }else if (data['pickup_orders']['links'][i]["label"]=="Next &raquo;"){
+          link_label.add("Next >");
+        }else{
+          link_label.add(data['pickup_orders']['links'][i]["label"]);
+        }
+        link_active.add(data['pickup_orders']['links'][i]["active"]);
+      });
+    }
+      for (i = 0; i < data['pickup_orders']['data'].length; i++) {
+        var tanggal = data['pickup_orders']['data'][i]['created_at'];
+        var idcity = data['pickup_orders']['data'][i]['city_id'];
+        setState(() {
+          id.add(data['pickup_orders']['data'][i]['id'].toString());
+          pickup_order_no.add(
+              data['pickup_orders']['data'][i]['pickup_order_no'].toString());
+          address.add(data['pickup_orders']['data'][i]['address']);
+          postal_code.add(data['pickup_orders']['data'][i]['postal_code']);
+          namaKota.add("");
+          get_CityID(idcity, i);
+          pickup_date.add("-");
+          estimate_volume.add(
+              data['pickup_orders']['data'][i]['estimate_volume'].toString());
+          status.add(data['pickup_orders']['data'][i]['status']);
+          tanggalOrder.add(formatTanggal(tanggal));
+          latitude.add(data['pickup_orders']['data'][i]['latitude'].toString());
+          longitude
+              .add(data['pickup_orders']['data'][i]['longitude'].toString());
+        });
+      }
+    setState((){ loading = false; });
+    });
+    return "tes";
+  }
+
+  DateTime loginClickTime;
+
+  bool isRedundentClick(DateTime currentTime){
+    if(loginClickTime==null){
+      loginClickTime = currentTime;
+      print("first click");
+      return false;
+    }
+    print('diff is ${currentTime.difference(loginClickTime).inSeconds}');
+    if(currentTime.difference(loginClickTime).inSeconds<10){//set this difference time in seconds
+      return true;
+    }
+
+    loginClickTime = currentTime;
+    return false;
   }
 
 // void changedropdownKota(String? kotaTerpilih) {
@@ -295,150 +480,38 @@ class _PermintaanPenjemputanState extends State<PermintaanPenjemputan> {
 }
 
 class RC_PermintaanPenjemputan extends StatelessWidget {
-  RC_PermintaanPenjemputan({
-    this.orderid,
-    this.alamat,
-    this.estimasi,
-    this.status,
-    this.volume,
-    this.tanggalEstimasi,
-    this.tanggalOrder,
-    this.namaKota,
-    this.postal_code,
-    this.latitude, this.longitude
-  });
+  RC_PermintaanPenjemputan(
+      {this.orderid,
+      this.alamat,
+      this.estimasi,
+      this.status,
+      this.volume,
+      this.tanggalEstimasi,
+      this.tanggalOrder,
+      this.namaKota,
+      this.postal_code,
+      this.latitude,
+      this.longitude});
 
-  String orderid, alamat, estimasi, status, volume, tanggalOrder, namaKota, postal_code, latitude, longitude;
+  String orderid,
+      alamat,
+      estimasi,
+      status,
+      volume,
+      tanggalOrder,
+      namaKota,
+      postal_code,
+      latitude,
+      longitude;
   Container tanggalEstimasi;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      // onTap: () {
-      //   showModalBottomSheet(
-      //       shape: RoundedRectangleBorder(
-      //         borderRadius: BorderRadius.only(
-      //             topLeft: Radius.circular(45), topRight: Radius.circular(45)),
-      //       ),
-      //       backgroundColor: Colors.white,
-      //       context: context,
-      //       builder: (context) {
-      //         return StatefulBuilder(
-      //           builder: (BuildContext context, StateSetter setState) {
-      //             return Container(
-      //               padding: EdgeInsets.all(30),
-      //               child: Column(
-      //                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      //                 children: [
-      //                   Column(
-      //                     crossAxisAlignment: CrossAxisAlignment.start,
-      //                     children: [
-      //                       Row(
-      //                         mainAxisAlignment: MainAxisAlignment.center,
-      //                         children: [
-      //                           Container(
-      //                             width: 50,
-      //                             child: Divider(
-      //                               color: Colors.blue,
-      //                               thickness: 5,
-      //                             ),
-      //                           ),
-      //                         ],
-      //                       ),
-      //                       SizedBox(
-      //                         height: 15,
-      //                       ),
-      //                       Text(
-      //                         "ID " + orderid,
-      //                         style: TextStyle(
-      //                           fontSize: 20,
-      //                           color: Colors.black,
-      //                           fontWeight: FontWeight.bold,
-      //                         ),
-      //                       ),
-      //                       SizedBox(
-      //                         height: 15,
-      //                       ),
-      //                       Container(
-      //                         child: Divider(color: Colors.blue),
-      //                       ),
-      //                       SizedBox(
-      //                         height: 15,
-      //                       ),
-      //                       Text(
-      //                         'Estimasi Penjemputan',
-      //                         style: TextStyle(
-      //                           fontSize: 15,
-      //                           color: Colors.grey,
-      //                           fontWeight: FontWeight.bold,
-      //                         ),
-      //                       ),
-      //                       tanggalEstimasi,
-      //                       SizedBox(
-      //                         height: 15,
-      //                       ),
-      //                       Text(
-      //                         'No Telp',
-      //                         style: TextStyle(
-      //                           fontSize: 15,
-      //                           color: Colors.grey,
-      //                           fontWeight: FontWeight.bold,
-      //                         ),
-      //                       ),
-      //                       Text(
-      //                         "081111",
-      //                         style: TextStyle(
-      //                           fontSize: 15,
-      //                           color: Colors.black,
-      //                           fontWeight: FontWeight.bold,
-      //                         ),
-      //                       ),
-      //                     ],
-      //                   ),
-      //                   Column(
-      //                     crossAxisAlignment: CrossAxisAlignment.stretch,
-      //                     children: [
-      //                       Container(
-      //                         height: 50,
-      //                         decoration: BoxDecoration(
-      //                           color: Color(0xff2f9efc),
-      //                           borderRadius: BorderRadius.circular(10),
-      //                         ),
-      //                         child: TextButton(
-      //                             onPressed: () {
-      //                               //showAlertDialog(context);
-      //                             },
-      //                             child: Text('Setujui',
-      //                                 style: TextStyle(color: Colors.white))),
-      //                       ),
-      //                       SizedBox(
-      //                         height: 10,
-      //                       ),
-      //                       Container(
-      //                         height: 50,
-      //                         decoration: BoxDecoration(
-      //                           color: Colors.red,
-      //                           borderRadius: BorderRadius.circular(10),
-      //                         ),
-      //                         child: TextButton(
-      //                             onPressed: () {
-      //                               //showAlertDialog2(context);
-      //                             },
-      //                             child: Text('Tolak',
-      //                                 style: TextStyle(color: Colors.white))),
-      //                       ),
-      //                     ],
-      //                   )
-      //                 ],
-      //               ),
-      //             );
-      //           },
-      //         );
-      //       });
-      // },
-      onTap: (){
+      onTap: () {
         Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => DetailPermintaan(orderid:orderid, latitude:latitude, longitude:longitude)));
+            builder: (context) => DetailPermintaan(
+                orderid: orderid, latitude: latitude, longitude: longitude)));
       },
       child: Container(
         margin: EdgeInsets.fromLTRB(30, 5, 30, 5),
@@ -491,7 +564,7 @@ class RC_PermintaanPenjemputan extends StatelessWidget {
                 ),
               ),
               Text(
-                alamat+", "+namaKota+", "+postal_code,
+                alamat + ", " + namaKota + ", " + postal_code,
                 style: TextStyle(
                   fontSize: 12,
                   color: Colors.black,

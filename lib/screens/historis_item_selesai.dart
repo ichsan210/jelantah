@@ -3,7 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart'; import 'package:jelantah/constants.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
@@ -44,7 +44,7 @@ class _Historis_Item_SelesaiState extends State<Historis_Item_Selesai> {
     };
     var body = json.encode(bodi);
     final response = await http.post(
-      Uri.parse("http://127.0.0.1:8000/api/admin/cities/$idcity/get"),
+      Uri.parse("$kIpAddress/api/admin/cities/$idcity/get"),
       body: body,
     );
     final data = jsonDecode(response.body);
@@ -71,7 +71,7 @@ class _Historis_Item_SelesaiState extends State<Historis_Item_Selesai> {
     };
     var body = json.encode(bodi);
     final response = await http.post(
-      Uri.parse("http://127.0.0.1:8000/api/admin/drivers/$idDriver/get"),
+      Uri.parse("$kIpAddress/api/admin/drivers/$idDriver/get"),
       body: body,
     );
     final data = jsonDecode(response.body);
@@ -90,7 +90,7 @@ class _Historis_Item_SelesaiState extends State<Historis_Item_Selesai> {
     };
     var body = json.encode(bodi);
     final response = await http.post(
-      Uri.parse("http://127.0.0.1:8000/api/admin/users/$idUser/get"),
+      Uri.parse("$kIpAddress/api/admin/users/$idUser/get"),
       body: body,
     );
     final data = jsonDecode(response.body);
@@ -120,7 +120,7 @@ class _Historis_Item_SelesaiState extends State<Historis_Item_Selesai> {
     };
     var body = json.encode(bodi);
     final response = await http.post(
-      Uri.parse("http://127.0.0.1:8000/api/admin/pickup_orders/$orderid/get"),
+      Uri.parse("$kIpAddress/api/admin/pickup_orders/$orderid/get"),
       body: body,
     );
     final data = jsonDecode(response.body);

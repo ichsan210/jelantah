@@ -6,7 +6,7 @@ import 'dart:convert' show JSON;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart'; import 'package:jelantah/constants.dart';
 import 'package:intl/intl.dart';
 import 'package:jelantah/screens/permintaan_penjemputan.dart';
 import 'package:jelantah/screens/tutorial.dart';
@@ -99,7 +99,7 @@ class _UbahPermintaanState extends State<UbahPermintaan> {
     Map bodi = {"token": _token};
     var body = json.encode(bodi);
     final response = await http.post(
-      Uri.parse("http://127.0.0.1:8000/api/admin/drivers/get"),
+      Uri.parse("$kIpAddress/api/admin/drivers/get"),
       body: body,
     );
     final data = jsonDecode(response.body);
@@ -322,7 +322,7 @@ class _UbahPermintaanState extends State<UbahPermintaan> {
     var body = json.encode(bodi);
     final response = await http.post(
       Uri.parse(
-          "http://127.0.0.1:8000/api/admin/pickup_orders/$noorder/assign/post"),
+          "$kIpAddress/api/admin/pickup_orders/$noorder/assign/post"),
       body: body,
     );
     final data = jsonDecode(response.body);

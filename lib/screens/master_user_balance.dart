@@ -1,7 +1,7 @@
 // @dart=2.9
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart'; import 'package:jelantah/constants.dart';
 import 'package:intl/intl.dart';
 import 'package:jelantah/screens/master_user.dart';
 import 'package:jelantah/screens/tambah_balance.dart';
@@ -49,7 +49,7 @@ class _MasterUserBalanceState extends State<MasterUserBalance> {
     Map bodi = {"token": _token, "user_id": userid};
     var body = json.encode(bodi);
     final response = await http.post(
-      Uri.parse("http://127.0.0.1:8000/api/admin/balance_history/get"),
+      Uri.parse("$kIpAddress/api/admin/balance_history/get"),
       body: body,
     );
     final data = jsonDecode(response.body);
@@ -336,7 +336,7 @@ class RC_UserBalance extends StatelessWidget {
     Map bodi = {"token": token};
     var body = json.encode(bodi);
     final response = await http.post(
-      Uri.parse("http://127.0.0.1:8000/api/admin/balance_history/$id/delete"),
+      Uri.parse("$kIpAddress/api/admin/balance_history/$id/delete"),
       body: body,
     );
     final data = jsonDecode(response.body);

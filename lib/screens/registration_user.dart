@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart'; import 'package:jelantah/constants.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -86,7 +86,7 @@ class _RegisterUserState extends State<RegisterUser> {
     };
     var body = jsonEncode(bodi);
     final response = await http.post(
-        Uri.parse("http://127.0.0.1:8000/api/admin/users/post"),
+        Uri.parse("$kIpAddress/api/admin/users/post"),
         body: body);
     final data = jsonDecode(response.body);
 
@@ -604,7 +604,7 @@ class UserApi {
     };
     var body = jsonEncode(bodi);
     final response = await http.post(
-        Uri.parse("http://127.0.0.1:8000/api/contributor/cities/get/"),
+        Uri.parse("$kIpAddress/api/contributor/cities/get/"),
         body: body);
     ResponseUserCity _data = responseUserCityFromJson(response.body);
     //developer.log(response.body);

@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart'; import 'package:jelantah/constants.dart';
 import 'package:jelantah/screens/master_driver.dart';
 import 'package:jelantah/screens/master_user.dart';
 import 'package:jelantah/screens/tutorial.dart';
@@ -55,7 +55,7 @@ class _MasterDriverPasswordState extends State<MasterDriverPassword> {
     };
     var body = json.encode(bodi);
     final response = await http.post(
-      Uri.parse("http://127.0.0.1:8000/api/admin/users/$iduser/password/put"),
+      Uri.parse("$kIpAddress/api/admin/users/$iduser/password/put"),
       body: body,
     );
     final data = jsonDecode(response.body);
