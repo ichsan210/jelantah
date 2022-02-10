@@ -148,7 +148,7 @@ class _DetailPermintaanPerjalananState extends State<DetailPermintaanPerjalanan>
     var d = endLocation.longitude;
 
     final response = await http.post(
-        Uri.parse("https://maps.googleapis.com/maps/api/directions/json?origin=$a,$b&destination=$c,$d&key=AIzaSyA5t6_SpJCStevGNL-B3O9om-NVjOzD1UQ")
+        Uri.parse("https://maps.googleapis.com/maps/api/directions/json?origin=$a,$b&destination=$c,$d&key=AIzaSyA5t6_SpJCStevGNL-B3O9om-NVjOzD1UQ"),
     );
     final data = jsonDecode(response.body);
     print(data);
@@ -183,7 +183,7 @@ class _DetailPermintaanPerjalananState extends State<DetailPermintaanPerjalanan>
       _target = startLocation;
       loading = false;
     });
-    Future.delayed(const Duration(milliseconds: 1000), (){
+    Future.delayed(const Duration(milliseconds: 500), (){
     mapController.animateCamera(CameraUpdate.newLatLngZoom(LatLng(startLocation.latitude, startLocation.longitude), 18));
     setState(() {
       _markers.add(
@@ -427,7 +427,7 @@ class _DetailPermintaanPerjalananState extends State<DetailPermintaanPerjalanan>
                                     mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Text(
+                                      SelectableText(
                                         'ID ' + pickup_order_no,
                                         style: TextStyle(
                                           fontSize: 15,
@@ -457,7 +457,7 @@ class _DetailPermintaanPerjalananState extends State<DetailPermintaanPerjalanan>
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                                Text(
+                                SelectableText(
                                   recipient_name+" ("+phone_number+")",
                                   style: TextStyle(
                                     fontSize: 12,
@@ -476,7 +476,7 @@ class _DetailPermintaanPerjalananState extends State<DetailPermintaanPerjalanan>
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                                Text(
+                                SelectableText(
                                   address +
                                       ", " +
                                       namaKota +
@@ -499,7 +499,7 @@ class _DetailPermintaanPerjalananState extends State<DetailPermintaanPerjalanan>
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                                Text(
+                                SelectableText(
                                   pickup_date,
                                   style: TextStyle(
                                     fontSize: 12,
@@ -518,7 +518,7 @@ class _DetailPermintaanPerjalananState extends State<DetailPermintaanPerjalanan>
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                                Text(
+                                SelectableText(
                                   driver_id,
                                   style: TextStyle(
                                     fontSize: 12,
@@ -545,7 +545,7 @@ class _DetailPermintaanPerjalananState extends State<DetailPermintaanPerjalanan>
                                             fontWeight: FontWeight.bold,
                                           ),
                                         ),
-                                        Text(
+                                        SelectableText(
                                           estimate_volume + ' Liter',
                                           style: TextStyle(
                                             fontSize: 12,

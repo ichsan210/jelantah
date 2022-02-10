@@ -1,7 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter/material.dart'; import 'package:jelantah/constants.dart';
+import 'package:flutter/material.dart';
+import 'package:jelantah/constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'register.dart';
 import 'dashboard.dart';
@@ -35,22 +36,24 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   login() async {
-    Map bodi = {
-      "email":email, "password":password
-    };
+    Map bodi = {"email": email, "password": password};
+    var header = {"Access-Control-Allow-Origin": "*"};
     var body = json.encode(bodi);
-    final response = await http.post(Uri.parse("$kIpAddress/api/admin/session/post"),
-        body: body);
+    final response = await http
+        .post(Uri.parse("$kIpAddress/api/admin/session/post"), headers: header, body: body);
     final data = jsonDecode(response.body);
     String status = data['status'];
     String pesan = data['message'];
     String token = data['token'];
 
     if (status == "success") {
-
       setState(() {
         _loginStatus = LoginStatus.signIn;
-        savePref(status, pesan, token, );
+        savePref(
+          status,
+          pesan,
+          token,
+        );
       });
       print(status);
       print(pesan);
@@ -62,7 +65,11 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  savePref(String status, String pesan, String token,) async {
+  savePref(
+    String status,
+    String pesan,
+    String token,
+  ) async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     setState(() {
       preferences.setString("status", status);
@@ -79,7 +86,8 @@ class _LoginPageState extends State<LoginPage> {
     setState(() {
       status = preferences.getString("status");
 
-      _loginStatus = status == "success" ? LoginStatus.signIn : LoginStatus.notSignIn;
+      _loginStatus =
+          status == "success" ? LoginStatus.signIn : LoginStatus.notSignIn;
     });
   }
 
@@ -107,125 +115,189 @@ class _LoginPageState extends State<LoginPage> {
           body: Form(
             key: _key,
             child: Center(
-              child: Container(
-                width: kIsWeb ? 500.0 : double.infinity,
-                child: Column(
-                  children: [
-                    Expanded(
+              child: Stack(
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                          image: AssetImage("assets/images/mobil1.PNG"),
+                          fit: BoxFit.cover),
+                    ),
+                  ),
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    top: -615,
+                    bottom: 0,
+                    child: Center(
                       child: Container(
+                        width: 460,
+                        height: 70,
                         decoration: BoxDecoration(
-                          image: DecorationImage(
-                            image: AssetImage("assets/images/mobil.PNG"),
-                            fit: BoxFit.fill
-                          ),
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(10),
                         ),
                       ),
                     ),
-                    Container(
-                      color: Colors.white,
-                      height: 380,
-                      child: Column(
-                        children: [
-                          Expanded(
-                            child: SingleChildScrollView(
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.only(
-                                    topLeft: Radius.circular(30),
-                                    topRight: Radius.circular(30),
+                  ),
+                  Positioned(
+                    left: 0,
+                    right: -10,
+                    top: -600,
+                    bottom: -10,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                            image: AssetImage("assets/images/logo.png"),
+                            scale: 3),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    top: 0,
+                    bottom: 0,
+                    child: Center(
+                      child: Container(
+                        width: kIsWeb ? 500.0 : double.infinity,
+                        color: Colors.white,
+                        height: 400,
+                        child: Column(
+                          children: [
+                            Expanded(
+                              child: SingleChildScrollView(
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.only(
+                                      topLeft: Radius.circular(30),
+                                      topRight: Radius.circular(30),
+                                    ),
                                   ),
-                                ),
-                                child: Padding(
-                                  padding: EdgeInsets.all(30),
-                                  child: Column(
-                                    children: [
-                                      Container(
-                                        decoration: BoxDecoration(
-                                            color: Colors.white,
-                                            borderRadius: BorderRadius.circular(10)),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                          CrossAxisAlignment.stretch,
-                                          children: <Widget>[
-                                            Text('Email / No Telp', style: TextStyle(color: Color(0xff283c71)),),
-                                            TextFormField(
-                                              style: TextStyle(color: Color(0xff283c71)),
-                                              validator: (e) {
-                                                if (e!.isEmpty) {
-                                                  return "Masukan Email / No Telp";
-                                                }
-                                              },
-                                              onSaved: (e) => email = e!,
-                                              decoration: InputDecoration(
-                                                hintText: "Masukan Email / No Telp", ),
-                                            ),
-                                            SizedBox(height: 10),
-                                            Text('Password', style: TextStyle(color: Color(0xff283c71)),),
-                                            TextFormField(
-                                              style: TextStyle(color: Color(0xff283c71)),
-                                              obscureText: _secureText,
-                                              onSaved: (e) => password = e!,
-                                              decoration: InputDecoration(
-                                                hintText: "Masukan Password",
-                                                suffixIcon: IconButton(
-                                                  onPressed: showHide,
-                                                  icon: Icon(_secureText
-                                                      ? Icons.visibility_off
-                                                      : Icons.visibility),
+                                  child: Padding(
+                                    padding: EdgeInsets.all(30),
+                                    child: Column(
+                                      children: [
+                                        Container(
+                                          decoration: BoxDecoration(
+                                              color: Colors.white,
+                                              borderRadius:
+                                                  BorderRadius.circular(10)),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.stretch,
+                                            children: <Widget>[
+                                              SelectableText(
+                                                'Email',
+                                                style: TextStyle(
+                                                    color: Color(0xff283c71)),
+                                              ),
+                                              TextFormField(
+                                                style: TextStyle(
+                                                    color: Color(0xff283c71)),
+                                                validator: (e) {
+                                                  if (e!.isEmpty) {
+                                                    return "Email belum terisi";
+                                                  }
+                                                },
+                                                onSaved: (e) => email = e!,
+                                                decoration: InputDecoration(
+                                                  hintText:
+                                                      "Masukan Email",
                                                 ),
                                               ),
-                                              validator: (e) {
-                                                if (e!.isEmpty) {
-                                                  return "Please insert password";
-                                                }
-                                              },
-                                            ),
-                                            SizedBox(height: 20),
-                                            Text("Lupa Password?", style: TextStyle(color: Colors.blue, fontSize: 16), textAlign: TextAlign.right,),
-                                            SizedBox(height: 40),
-                                            Container(
-                                              height: 50,
-                                              decoration: BoxDecoration(
-                                                color: Color(0xff2f9efc),
-                                                borderRadius: BorderRadius.circular(10),
+                                              SizedBox(height: 10),
+                                              SelectableText(
+                                                'Password',
+                                                style: TextStyle(
+                                                    color: Color(0xff283c71)),
                                               ),
-                                              child: TextButton(
-                                                  onPressed: () {
-                                                    check();
-                                                  },
-                                                  child: Text('Masuk',
-                                                      style:
-                                                      TextStyle(color: Colors.white))),
-                                            ),
-                                            SizedBox(height: 20),
-                                            Row(
-                                              mainAxisAlignment: MainAxisAlignment.center,
-                                              children: [
-                                                Text("Belum punya akun? ", style: TextStyle(color: Colors.grey, fontSize: 16), ),
-                                                GestureDetector(
-                                                  onTap: (){
-                                                    // Navigator.of(context).push(MaterialPageRoute(
-                                                    //     builder: (context) =>
-                                                    //         Register()));
-                                                  },
-                                                    child: Text("Daftar", style: TextStyle(color: Colors.blue, fontSize: 16), )),
-                                              ],
-                                            )
-                                          ],
+                                              TextFormField(
+                                                style: TextStyle(
+                                                    color: Color(0xff283c71)),
+                                                obscureText: _secureText,
+                                                onSaved: (e) => password = e!,
+                                                decoration: InputDecoration(
+                                                  hintText: "Masukan Password",
+                                                  suffixIcon: IconButton(
+                                                    onPressed: showHide,
+                                                    icon: Icon(_secureText
+                                                        ? Icons.visibility_off
+                                                        : Icons.visibility),
+                                                  ),
+                                                ),
+                                                validator: (e) {
+                                                  if (e!.isEmpty) {
+                                                    return "Password belum terisi";
+                                                  }
+                                                },
+                                              ),
+                                              SizedBox(height: 20),
+                                              SelectableText(
+                                                "Lupa Password?",
+                                                style: TextStyle(
+                                                    color: Colors.blue,
+                                                    fontSize: 16),
+                                                textAlign: TextAlign.right,
+                                              ),
+                                              SizedBox(height: 20),
+                                              Container(
+                                                height: 50,
+                                                decoration: BoxDecoration(
+                                                  color: Color(0xff2f9efc),
+                                                  borderRadius:
+                                                      BorderRadius.circular(10),
+                                                ),
+                                                child: TextButton(
+                                                    onPressed: () {
+                                                      check();
+                                                    },
+                                                    child: Text('Masuk',
+                                                        style: TextStyle(
+                                                            color:
+                                                                Colors.white))),
+                                              ),
+                                              SizedBox(height: 20),
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                children: [
+                                                  SelectableText(
+                                                    "Aplikasi Admin Jemput Jelantah",
+                                                    style: TextStyle(
+                                                        color: Colors.black,
+                                                        fontSize: 16),
+                                                  ),
+                                                  // GestureDetector(
+                                                  //     onTap: () {
+                                                  //       // Navigator.of(context).push(MaterialPageRoute(
+                                                  //       //     builder: (context) =>
+                                                  //       //         Register()));
+                                                  //     },
+                                                  //     child: SelectableText(
+                                                  //       "Daftar",
+                                                  //       style: TextStyle(
+                                                  //           color: Colors.blue,
+                                                  //           fontSize: 16),
+                                                  //     )),
+                                                ],
+                                              )
+                                            ],
+                                          ),
                                         ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -238,19 +310,18 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void showAlertDialog(BuildContext context) {
-
     // set up the buttons
     Widget continueButton = TextButton(
-      child: Text("Ok"),
-      onPressed:  () {
+      child: SelectableText("Ok"),
+      onPressed: () {
         Navigator.of(context).pop();
       },
     );
 
     // set up the AlertDialog
     AlertDialog alert = AlertDialog(
-      title: Text("Login Gagal"),
-      content: Text("Email atau Password salah!"),
+      title: SelectableText("Login Gagal"),
+      content: SelectableText("Email atau Password salah!"),
       actions: [
         continueButton,
       ],
@@ -264,9 +335,4 @@ class _LoginPageState extends State<LoginPage> {
       },
     );
   }
-
 }
-
-
-
-

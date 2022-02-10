@@ -21,7 +21,7 @@ class ChatList extends StatefulWidget {
 
 class _ChatListState extends State<ChatList> {
   int _selectedNavbar = 2;
-
+  bool loading = true;
   // var nama = [
   //   "Daniel Ardian",
   //   "Muhamad Ichsan",
@@ -67,6 +67,11 @@ class _ChatListState extends State<ChatList> {
         count.add(data['chat_list'][i]['count']);
       });
     }
+    Future.delayed(const Duration(milliseconds: 1000), () {
+      setState(() {
+        loading = false;
+      });
+    });
   }
 
   getPref() async {
@@ -89,6 +94,83 @@ class _ChatListState extends State<ChatList> {
 
   @override
   Widget build(BuildContext context) {
+    if (loading)
+      return Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+        bottomNavigationBar: BottomNavigationBar(
+          type: BottomNavigationBarType.fixed,
+          items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home_outlined),
+              label: 'Beranda',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(FlutterIcons.file_text_o_faw),
+              label: 'Riwayat',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.chat_outlined),
+              label: 'Pesan',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person_outline),
+              label: 'Profil',
+            ),
+          ],
+          currentIndex: _selectedNavbar,
+          selectedItemColor: Colors.blue,
+          unselectedItemColor: Colors.blueGrey,
+          showUnselectedLabels: true,
+          onTap: (index) {
+            switch (index) {
+              case 0:
+                Navigator.push(
+                  context,
+                  PageRouteBuilder(
+                    pageBuilder: (c, a1, a2) => LoginPage(),
+                    transitionsBuilder: (c, anim, a2, child) =>
+                        FadeTransition(opacity: anim, child: child),
+                    transitionDuration: Duration(milliseconds: 200),
+                  ),
+                );
+                break;
+              case 1:
+                Navigator.push(
+                  context,
+                  PageRouteBuilder(
+                    pageBuilder: (c, a1, a2) => Historis(),
+                    transitionsBuilder: (c, anim, a2, child) =>
+                        FadeTransition(opacity: anim, child: child),
+                    transitionDuration: Duration(milliseconds: 300),
+                  ),
+                );
+                break;
+              case 2:
+                Navigator.push(
+                  context,
+                  PageRouteBuilder(
+                    pageBuilder: (c, a1, a2) => ChatList(),
+                    transitionsBuilder: (c, anim, a2, child) =>
+                        FadeTransition(opacity: anim, child: child),
+                    transitionDuration: Duration(milliseconds: 300),
+                  ),
+                );
+                break;
+              case 3:
+                Navigator.push(
+                  context,
+                  PageRouteBuilder(
+                    pageBuilder: (c, a1, a2) => Account(),
+                    transitionsBuilder: (c, anim, a2, child) =>
+                        FadeTransition(opacity: anim, child: child),
+                    transitionDuration: Duration(milliseconds: 300),
+                  ),
+                );
+                break;
+            }
+          },
+        ),
+      );
     return Center(
       child: Container(
         child: Scaffold(
@@ -132,19 +214,19 @@ class _ChatListState extends State<ChatList> {
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: Icon(Icons.home_outlined),
-                title: Text('Beranda'),
+                label: 'Beranda',
               ),
               BottomNavigationBarItem(
                 icon: Icon(FlutterIcons.file_text_o_faw),
-                title: Text('Riwayat'),
+                label: 'Riwayat',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.chat_outlined),
-                title: Text('Pesan'),
+                label: 'Pesan',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.person_outline),
-                title: Text('Profil'),
+                label: 'Profil',
               ),
             ],
             currentIndex: _selectedNavbar,

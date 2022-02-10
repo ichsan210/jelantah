@@ -235,7 +235,7 @@ class _Historis_Item_SelesaiState extends State<Historis_Item_Selesai> {
                               mainAxisAlignment:
                               MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(
+                                SelectableText(
                                   'ID ' + pickup_order_no,
                                   style: TextStyle(
                                     fontSize: 15,
@@ -243,7 +243,7 @@ class _Historis_Item_SelesaiState extends State<Historis_Item_Selesai> {
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                                Text(
+                                SelectableText(
                                   tanggalOrder,
                                   style: TextStyle(
                                     fontSize: 12,
@@ -254,7 +254,7 @@ class _Historis_Item_SelesaiState extends State<Historis_Item_Selesai> {
                               ],
                             ),
                             SizedBox(height: 10,),
-                            Text(
+                            SelectableText(
                               user_id,
                               style: TextStyle(
                                 fontSize: 15,
@@ -276,7 +276,7 @@ class _Historis_Item_SelesaiState extends State<Historis_Item_Selesai> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      Text(
+                      SelectableText(
                         pemesan+" ("+phone_number+") / "+penerima,
                         style: TextStyle(
                           fontSize: 12,
@@ -295,7 +295,7 @@ class _Historis_Item_SelesaiState extends State<Historis_Item_Selesai> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      Text(
+                      SelectableText(
                         address+", "+namaKota+", "+postal_code,
                         style: TextStyle(
                           fontSize: 12,
@@ -314,7 +314,7 @@ class _Historis_Item_SelesaiState extends State<Historis_Item_Selesai> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      Text(
+                      SelectableText(
                         pickup_date,
                         style: TextStyle(
                           fontSize: 12,
@@ -333,7 +333,7 @@ class _Historis_Item_SelesaiState extends State<Historis_Item_Selesai> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      Text(
+                      SelectableText(
                         driver_id,
                         style: TextStyle(
                           fontSize: 12,
@@ -360,7 +360,7 @@ class _Historis_Item_SelesaiState extends State<Historis_Item_Selesai> {
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              Text(
+                              SelectableText(
                                 estimate_volume + ' Liter',
                                 style: TextStyle(
                                   fontSize: 12,
@@ -382,7 +382,7 @@ class _Historis_Item_SelesaiState extends State<Historis_Item_Selesai> {
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              Text(
+                              SelectableText(
                                 price + '/Liter',
                                 style: TextStyle(
                                   fontSize: 12,
@@ -413,7 +413,7 @@ class _Historis_Item_SelesaiState extends State<Historis_Item_Selesai> {
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              Text(
+                              SelectableText(
                                 'Rp. '+total_price+',-',
                                 style: TextStyle(
                                   fontSize: 12,

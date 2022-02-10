@@ -35,19 +35,7 @@ class Dashboard extends StatefulWidget {
 }
 
 class _DashboardState extends State<Dashboard> {
-  var url = [
-    "https://www.youtube.com/watch?v=LvUYbxlSGHw",
-    "https://www.youtube.com/watch?v=LvUYbxlSGHw",
-    "https://www.youtube.com/watch?v=LvUYbxlSGHw"
-  ];
-  var idyoutube = ["LvUYbxlSGHw", "LvUYbxlSGHw", "LvUYbxlSGHw","8XYqZgntKr0"];
-  var judul = [
-    "Semua yang perlu kamu ketahui, Jelantah App",
-    "judul2",
-    "judul3"
-  ];
-  var deskripsi = ["youtube1", "youtube1", "youtube1"];
-  var tanggal = ["10 Oktober 2021", "10 Oktober 2021", "10 Oktober 2021"];
+
 
   String _token;
   var _first_name = "..";
@@ -62,6 +50,8 @@ class _DashboardState extends State<Dashboard> {
   var youtube_link = new List();
   var date = new List();
 
+  var status, _loginStatus;
+
   get_data() async {
     Map bodi = {"token": _token};
     var body = json.encode(bodi);
@@ -70,13 +60,19 @@ class _DashboardState extends State<Dashboard> {
       body: body,
     );
     final data = jsonDecode(response.body);
-    print(1);
-    String first_name = data['user']['first_name'];
-    String last_name = data['user']['last_name'];
-    setState(() {
-      _first_name = first_name;
-      _last_name = last_name;
-    });
+    if(data['status']=="success")
+    {
+      String first_name = data['user']['first_name'];
+      String last_name = data['user']['last_name'];
+      setState(() {
+        _first_name = first_name;
+        _last_name = last_name;
+      });
+    }
+    else{
+      signOut();
+      print("zzzzzzzzzzz");
+    }
   }
 
   get_dashboard() async {
@@ -117,9 +113,11 @@ class _DashboardState extends State<Dashboard> {
   getPref() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     setState(
-      () {
-        _token = preferences.getString("token");
+          () {
+        _token = preferences.getString('token');
         print(_token);
+        status = preferences.getString("status");
+        _loginStatus = status == "success" ? LoginStatus.signIn : LoginStatus.notSignIn;
       },
     );
     get_data();
@@ -127,10 +125,16 @@ class _DashboardState extends State<Dashboard> {
     get_video();
   }
 
-  signOut() {
+  signOut() async {
+    print("signout jalan");
+    SharedPreferences preferences = await SharedPreferences.getInstance();
     setState(() {
-      widget.signOut();
+      preferences.setInt("status", null);
+      preferences.commit();
+      _loginStatus = LoginStatus.notSignIn;
     });
+    Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) => LoginPage()));
   }
 
   @override
@@ -590,24 +594,24 @@ class _DashboardState extends State<Dashboard> {
           ),
           bottomNavigationBar: BottomNavigationBar(
             type: BottomNavigationBarType.fixed,
-            items: const <BottomNavigationBarItem>[
-              BottomNavigationBarItem(
-                icon: Icon(Icons.home_outlined),
-                title: Text('Beranda'),
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(FlutterIcons.file_text_o_faw),
-                title: Text('Riwayat'),
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.chat_outlined),
-                title: Text('Pesan'),
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.person_outline),
-                title: Text('Profil'),
-              ),
-            ],
+              items: const <BottomNavigationBarItem>[
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.home_outlined),
+                  label: 'Beranda',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(FlutterIcons.file_text_o_faw),
+                  label: 'Riwayat',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.chat_outlined),
+                  label: 'Pesan',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.person_outline),
+                  label: 'Profil',
+                ),
+              ],
             currentIndex: _selectedNavbar,
             selectedItemColor: Colors.blue,
             unselectedItemColor: Colors.blueGrey,

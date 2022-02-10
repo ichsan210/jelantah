@@ -20,7 +20,6 @@ class PermintaanPenjemputan extends StatefulWidget {
 }
 
 class _PermintaanPenjemputanState extends State<PermintaanPenjemputan> {
-
   var orderid = ["123-456-789", "123-456-789", "123-456-789", "123-456-789"];
   var alamat = [
     "Jalan Cut Meutia No 1, Jakarta Barat, 11146",
@@ -105,11 +104,12 @@ class _PermintaanPenjemputanState extends State<PermintaanPenjemputan> {
     for (i = 0; i < data['pickup_orders']['links'].length; i++) {
       setState(() {
         link_url.add(data['pickup_orders']['links'][i]["url"]);
-        if(data['pickup_orders']['links'][i]["label"]=="&laquo; Previous"){
+        if (data['pickup_orders']['links'][i]["label"] == "&laquo; Previous") {
           link_label.add("< Previous");
-        }else if (data['pickup_orders']['links'][i]["label"]=="Next &raquo;"){
+        } else if (data['pickup_orders']['links'][i]["label"] ==
+            "Next &raquo;") {
           link_label.add("Next >");
-        }else{
+        } else {
           link_label.add(data['pickup_orders']['links'][i]["label"]);
         }
         link_active.add(data['pickup_orders']['links'][i]["active"]);
@@ -137,7 +137,7 @@ class _PermintaanPenjemputanState extends State<PermintaanPenjemputan> {
     }
   }
 
-  get_data_page(link_url_pilih) async{
+  get_data_page(link_url_pilih) async {
     await refresh_data();
     var pesan = await data_api(link_url_pilih);
     print(pesan);
@@ -152,7 +152,9 @@ class _PermintaanPenjemputanState extends State<PermintaanPenjemputan> {
       },
     );
     get_data();
-    setState((){ loading = false; });
+    setState(() {
+      loading = false;
+    });
   }
 
   @override
@@ -184,28 +186,30 @@ class _PermintaanPenjemputanState extends State<PermintaanPenjemputan> {
 
   @override
   Widget build(BuildContext context) {
-    if(loading) return Scaffold(
-        appBar: AppBar(
-            titleSpacing: 0,
-            leading: IconButton(
-              onPressed: () {
-                Navigator.of(context).push(
-                    MaterialPageRoute(builder: (context) => LoginPage()));
-              },
-              color: Colors.blue,
-              icon: Icon(
-                Icons.keyboard_arrow_left,
-                size: 30,
+    if (loading)
+      return Scaffold(
+          appBar: AppBar(
+              titleSpacing: 0,
+              leading: IconButton(
+                onPressed: () {
+                  Navigator.of(context).push(
+                      MaterialPageRoute(builder: (context) => LoginPage()));
+                },
+                color: Colors.blue,
+                icon: Icon(
+                  Icons.keyboard_arrow_left,
+                  size: 30,
+                ),
               ),
-            ),
-            title: Text(
-              "Permintaan Penjemputan",
-              style: TextStyle(
-                color: Colors.blue, // 3
+              title: Text(
+                "Permintaan Penjemputan",
+                style: TextStyle(
+                  color: Colors.blue, // 3
+                ),
               ),
-            ),
-            backgroundColor: Colors.transparent,
-            elevation: 0.0),body: Center(child: CircularProgressIndicator()));
+              backgroundColor: Colors.transparent,
+              elevation: 0.0),
+          body: Center(child: CircularProgressIndicator()));
 
     return Center(
       child: Container(
@@ -237,6 +241,81 @@ class _PermintaanPenjemputanState extends State<PermintaanPenjemputan> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Container(
+                    margin: EdgeInsets.fromLTRB(40, 10, 40, 10),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Container(
+                          width: 130,
+                          child: Text(
+                            'ID Order',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        Container(
+                          width: 130,
+                          child: Text(
+                            'Tanggal Order',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        Container(
+                          width: 300,
+                          child: Text(
+                            'Alamat',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        Container(
+                          width: 130,
+                          child: Text(
+                            'Estimasi Volume Minyak',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        Container(
+                          width: 130,
+                          child: Text(
+                            'Tanggal Penjemputan',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        Container(
+                          alignment: Alignment.center,
+                          width: 130,
+                          child: Text(
+                            'Status',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                   Expanded(
                     child: Scrollbar(
                       showTrackOnHover: true,
@@ -292,13 +371,15 @@ class _PermintaanPenjemputanState extends State<PermintaanPenjemputan> {
       child: TextButton(
         onPressed: () {
           Future.delayed(const Duration(milliseconds: 2000), () {
-            if(isRedundentClick(DateTime.now())){
+            if (isRedundentClick(DateTime.now())) {
               print('hold on, processing');
               return;
             }
             setState(() {
               if (link_url != null && link_active != true) {
-                setState((){ loading = true; });
+                setState(() {
+                  loading = true;
+                });
                 get_data_page(link_url);
               }
             });
@@ -395,7 +476,7 @@ class _PermintaanPenjemputanState extends State<PermintaanPenjemputan> {
     longitude.clear();
   }
 
-  data_api(link_url_pilih) async{
+  data_api(link_url_pilih) async {
     Map bodi = {
       "token": _token,
       "status": ["pending", "change_date"],
@@ -410,19 +491,21 @@ class _PermintaanPenjemputanState extends State<PermintaanPenjemputan> {
     final data = jsonDecode(response.body);
 
     Future.delayed(const Duration(milliseconds: 3000), () {
-    for (i = 0; i < data['pickup_orders']['links'].length; i++) {
-      setState(() {
-        link_url.add(data['pickup_orders']['links'][i]["url"]);
-        if(data['pickup_orders']['links'][i]["label"]=="&laquo; Previous"){
-          link_label.add("< Previous");
-        }else if (data['pickup_orders']['links'][i]["label"]=="Next &raquo;"){
-          link_label.add("Next >");
-        }else{
-          link_label.add(data['pickup_orders']['links'][i]["label"]);
-        }
-        link_active.add(data['pickup_orders']['links'][i]["active"]);
-      });
-    }
+      for (i = 0; i < data['pickup_orders']['links'].length; i++) {
+        setState(() {
+          link_url.add(data['pickup_orders']['links'][i]["url"]);
+          if (data['pickup_orders']['links'][i]["label"] ==
+              "&laquo; Previous") {
+            link_label.add("< Previous");
+          } else if (data['pickup_orders']['links'][i]["label"] ==
+              "Next &raquo;") {
+            link_label.add("Next >");
+          } else {
+            link_label.add(data['pickup_orders']['links'][i]["label"]);
+          }
+          link_active.add(data['pickup_orders']['links'][i]["active"]);
+        });
+      }
       for (i = 0; i < data['pickup_orders']['data'].length; i++) {
         var tanggal = data['pickup_orders']['data'][i]['created_at'];
         var idcity = data['pickup_orders']['data'][i]['city_id'];
@@ -444,21 +527,24 @@ class _PermintaanPenjemputanState extends State<PermintaanPenjemputan> {
               .add(data['pickup_orders']['data'][i]['longitude'].toString());
         });
       }
-    setState((){ loading = false; });
+      setState(() {
+        loading = false;
+      });
     });
     return "tes";
   }
 
   DateTime loginClickTime;
 
-  bool isRedundentClick(DateTime currentTime){
-    if(loginClickTime==null){
+  bool isRedundentClick(DateTime currentTime) {
+    if (loginClickTime == null) {
       loginClickTime = currentTime;
       print("first click");
       return false;
     }
     print('diff is ${currentTime.difference(loginClickTime).inSeconds}');
-    if(currentTime.difference(loginClickTime).inSeconds<10){//set this difference time in seconds
+    if (currentTime.difference(loginClickTime).inSeconds < 10) {
+      //set this difference time in seconds
       return true;
     }
 
@@ -536,78 +622,42 @@ class RC_PermintaanPenjemputan extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      'ID ' + orderid,
-                      style: TextStyle(
-                        fontSize: 15,
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Text(
-                      tanggalOrder,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Text(
-                'Alamat',
-                style: TextStyle(
-                  fontSize: 10,
-                  color: Colors.grey,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                alamat + ", " + namaKota + ", " + postal_code,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              SizedBox(
-                height: 10,
-              ),
-              Text(
-                'Estimasi Penjemputan',
-                style: TextStyle(
-                  fontSize: 10,
-                  color: Colors.grey,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                estimasi,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              SizedBox(
-                height: 10,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Total Volume',
+                    Container(
+                      width:130,
+                      child: Text(
+                        orderid,
                         style: TextStyle(
-                          fontSize: 10,
-                          color: Colors.grey,
+                          fontSize: 12,
+                          color: Colors.black,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      Text(
+                    ),
+                    Container(
+                      width:130,
+                      child: Text(
+                        tanggalOrder,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    Container(
+                      width:300,
+                      child: Text(
+                        alamat + ", " + namaKota + ", " + postal_code,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    Container(
+                      width:130,
+                      child: Text(
                         volume + ' Liter',
                         style: TextStyle(
                           fontSize: 12,
@@ -615,25 +665,46 @@ class RC_PermintaanPenjemputan extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                    ],
-                  ),
-                  if (status == 'pending')
-                    TextButton(
-                      onPressed: () {},
-                      child: Text(
-                        "Pending",
-                        style: TextStyle(color: Color(0xFF125894)),
-                      ),
-                      style: ButtonStyle(
-                          backgroundColor:
-                              MaterialStateProperty.all(Color(0xFFE7EEF4)),
-                          shape:
-                              MaterialStateProperty.all<RoundedRectangleBorder>(
-                                  RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10.0),
-                          ))),
                     ),
-                ],
+                    Container(
+                      width:130,
+                      child: Text(
+                        estimasi,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    if (status == 'pending')
+                      Container(
+                        width:130,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            TextButton(
+                              onPressed: () {},
+                              child: Text(
+                                "Pending",
+                                style: TextStyle(color: Color(0xFF125894)),
+                              ),
+                              style: ButtonStyle(
+                                backgroundColor:
+                                    MaterialStateProperty.all(Color(0xFFE7EEF4)),
+                                shape:
+                                    MaterialStateProperty.all<RoundedRectangleBorder>(
+                                  RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10.0),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
               ),
             ],
           ),

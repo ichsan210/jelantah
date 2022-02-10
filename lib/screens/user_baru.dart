@@ -2,7 +2,8 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart'; import 'package:jelantah/constants.dart';
+import 'package:flutter/material.dart';
+import 'package:jelantah/constants.dart';
 import 'package:jelantah/screens/login_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
@@ -29,13 +30,16 @@ class _UserBaruState extends State<UserBaru> {
   //var first_name=new List(5);
   //List<String> first_name = List<String>.empty(growable: true);
   //var first_name = <String>[];
-
+  bool loading = true;
   var _panjangdata;
   var id = new List();
   var first_name = new List();
   var last_name = new List();
   var address = new List();
   var phone_number = new List();
+  var email = new List();
+  var namaKota = new List();
+  var postal_code = new List();
 
   //var last_name, address,phone_number;
   var i = 0;
@@ -52,17 +56,29 @@ class _UserBaruState extends State<UserBaru> {
       body: body,
     );
     final data = jsonDecode(response.body);
+    print(data);
     for (i = 0; i < data['users'].length; i++) {
       if (data['users'][i]['is_approve'] == 0) {
+        var idcity = data['users'][i]['addresses'][0]['city_id'];
+        print("aaaaaaaaaaaaaaaaaa " + idcity.toString());
         setState(() {
           id.add(data['users'][i]['id']);
           first_name.add(data['users'][i]['first_name']);
           last_name.add(data['users'][i]['last_name']);
           address.add(data['users'][i]['addresses'][0]['address']);
+          email.add(data['users'][i]['email']);
+          get_CityID(idcity);
           phone_number.add(data['users'][i]['addresses'][0]['phone_number']);
+          postal_code.add(data['users'][i]['addresses'][0]['postal_code']);
         });
+        print("aaa" + i.toString());
       }
     }
+    Future.delayed(const Duration(milliseconds: 1000), () {
+      setState(() {
+        loading = false;
+      });
+    });
   }
 
   getPref() async {
@@ -85,16 +101,14 @@ class _UserBaruState extends State<UserBaru> {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Container(
-        // width: kIsWeb ? 500.0 : double.infinity,
-        child: Scaffold(
+    if (loading)
+      return Scaffold(
           appBar: AppBar(
               titleSpacing: 0,
               leading: IconButton(
                 onPressed: () {
-                  Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => LoginPage()));
+                  Navigator.of(context).push(
+                      MaterialPageRoute(builder: (context) => LoginPage()));
                 },
                 color: Colors.blue,
                 icon: Icon(
@@ -103,7 +117,33 @@ class _UserBaruState extends State<UserBaru> {
                 ),
               ),
               title: Text(
-                "User Baru",
+                "Permintaan User Baru",
+                style: TextStyle(
+                  color: Colors.blue, // 3
+                ),
+              ),
+              backgroundColor: Colors.transparent,
+              elevation: 0.0),
+          body: Center(child: CircularProgressIndicator()));
+    return Center(
+      child: Container(
+        // width: kIsWeb ? 500.0 : double.infinity,
+        child: Scaffold(
+          appBar: AppBar(
+              titleSpacing: 0,
+              leading: IconButton(
+                onPressed: () {
+                  Navigator.of(context).push(
+                      MaterialPageRoute(builder: (context) => LoginPage()));
+                },
+                color: Colors.blue,
+                icon: Icon(
+                  Icons.keyboard_arrow_left,
+                  size: 30,
+                ),
+              ),
+              title: Text(
+                "Permintaan User Baru",
                 style: TextStyle(
                   color: Colors.blue, // 3
                 ),
@@ -115,8 +155,10 @@ class _UserBaruState extends State<UserBaru> {
               SizedBox(
                 height: 10,
               ),
-              FutureBuilder<dynamic>( // async work
-                builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+              FutureBuilder<dynamic>(
+                // async work
+                builder:
+                    (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
                   switch (snapshot.connectionState) {
                     case ConnectionState.waiting:
                       return Text('Loading....');
@@ -137,6 +179,9 @@ class _UserBaruState extends State<UserBaru> {
                                         nama_belakang: last_name[i],
                                         notelp: phone_number[i],
                                         alamat: address[i],
+                                        postal_code: postal_code[i],
+                                        email: email[i],
+                                        namaKota: namaKota[i],
                                         id: id[i],
                                         token: _token)
                                   //   // RC_UserBaru(nama: 'Dabiel Ardian', notelp: '08787876667', alamat: 'Jalan Cut Meutia No 1, Jakarta Barat, 11146',),
@@ -159,6 +204,23 @@ class _UserBaruState extends State<UserBaru> {
         ),
       ),
     );
+  }
+
+  get_CityID(idcity) async {
+    Map bodi = {
+      "token": _token,
+    };
+    var body = json.encode(bodi);
+    final response = await http.post(
+      Uri.parse("$kIpAddress/api/admin/cities/$idcity/get"),
+      body: body,
+    );
+    final data = jsonDecode(response.body);
+    var cityName = data['city']['name'].toString();
+    print(cityName + i.toString());
+    setState(() {
+      namaKota.add(cityName);
+    });
   }
 
 // @override
@@ -228,9 +290,25 @@ class _UserBaruState extends State<UserBaru> {
 }
 
 class RC_UserBaru extends StatelessWidget {
-  RC_UserBaru({this.nama, this.nama_belakang, this.notelp, this.alamat, this.id, this.token});
+  RC_UserBaru(
+      {this.nama,
+      this.nama_belakang,
+      this.notelp,
+      this.alamat,
+      this.email,
+      this.id,
+      this.token,
+      this.postal_code,
+      this.namaKota});
 
-  String nama, nama_belakang, notelp, alamat, token;
+  String nama,
+      nama_belakang,
+      notelp,
+      alamat,
+      token,
+      email,
+      postal_code,
+      namaKota;
   int id;
 
   @override
@@ -269,7 +347,7 @@ class RC_UserBaru extends StatelessWidget {
                           height: 15,
                         ),
                         Text(
-                          nama+" "+nama_belakang,
+                          nama + " " + nama_belakang,
                           style: TextStyle(
                             fontSize: 20,
                             color: Colors.black,
@@ -294,7 +372,7 @@ class RC_UserBaru extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          alamat,
+                          alamat + ", "+namaKota+", "+ postal_code,
                           style: TextStyle(
                             fontSize: 15,
                             color: Colors.black,
@@ -369,59 +447,37 @@ class RC_UserBaru extends StatelessWidget {
         ),
         child: Container(
           padding: EdgeInsets.all(10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius:
-                      BorderRadius.vertical(top: Radius.circular(10.0)),
-                ),
-                child: Text(
-                  nama,
-                  style: TextStyle(
-                    fontSize: 15,
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              SizedBox(
-                height: 10,
-              ),
               Text(
-                'Alamat',
+                nama + " " + nama_belakang,
                 style: TextStyle(
-                  fontSize: 10,
-                  color: Colors.grey,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                alamat,
-                style: TextStyle(
-                  fontSize: 10,
+                  fontSize: 14,
                   color: Colors.black,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              SizedBox(
-                height: 10,
+              Text(
+                alamat + ", " + namaKota + ", " + postal_code,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               Text(
-                'No Telp',
+                email,
                 style: TextStyle(
-                  fontSize: 10,
-                  color: Colors.grey,
+                  fontSize: 14,
+                  color: Colors.black,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               Text(
                 notelp,
                 style: TextStyle(
-                  fontSize: 10,
+                  fontSize: 14,
                   color: Colors.black,
                   fontWeight: FontWeight.bold,
                 ),

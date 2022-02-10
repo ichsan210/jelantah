@@ -237,7 +237,7 @@ class _Historis_Item_BatalState extends State<Historis_Item_Batal> {
                               mainAxisAlignment:
                               MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(
+                                SelectableText(
                                   'ID ' + pickup_order_no,
                                   style: TextStyle(
                                     fontSize: 15,
@@ -245,7 +245,7 @@ class _Historis_Item_BatalState extends State<Historis_Item_Batal> {
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                                Text(
+                                SelectableText(
                                   tanggalOrder,
                                   style: TextStyle(
                                     fontSize: 12,
@@ -255,7 +255,7 @@ class _Historis_Item_BatalState extends State<Historis_Item_Batal> {
                                 ),
                               ],
                             ),
-                            Text(
+                            SelectableText(
                               user_id,
                               style: TextStyle(
                                 fontSize: 15,
@@ -277,7 +277,7 @@ class _Historis_Item_BatalState extends State<Historis_Item_Batal> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      Text(
+                      SelectableText(
                         pemesan+" ("+phone_number+")",
                         style: TextStyle(
                           fontSize: 12,
@@ -296,7 +296,7 @@ class _Historis_Item_BatalState extends State<Historis_Item_Batal> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      Text(
+                      SelectableText(
                         address+", "+namaKota+", "+postal_code,
                         style: TextStyle(
                           fontSize: 12,
@@ -315,7 +315,7 @@ class _Historis_Item_BatalState extends State<Historis_Item_Batal> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      Text(
+                      SelectableText(
                         pickup_date,
                         style: TextStyle(
                           fontSize: 12,
@@ -334,7 +334,7 @@ class _Historis_Item_BatalState extends State<Historis_Item_Batal> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      Text(
+                      SelectableText(
                         driver_id,
                         style: TextStyle(
                           fontSize: 12,
@@ -361,7 +361,7 @@ class _Historis_Item_BatalState extends State<Historis_Item_Batal> {
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              Text(
+                              SelectableText(
                                 estimate_volume + ' Liter',
                                 style: TextStyle(
                                   fontSize: 12,
@@ -383,7 +383,7 @@ class _Historis_Item_BatalState extends State<Historis_Item_Batal> {
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              Text(
+                              SelectableText(
                                 price + '/Liter',
                                 style: TextStyle(
                                   fontSize: 12,
@@ -414,7 +414,7 @@ class _Historis_Item_BatalState extends State<Historis_Item_Batal> {
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              Text(
+                              SelectableText(
                                 cancel_reason,
                                 style: TextStyle(
                                   fontSize: 12,

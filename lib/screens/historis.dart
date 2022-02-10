@@ -152,11 +152,12 @@ class _HistorisState extends State<Historis> {
     for (i = 0; i < data['pickup_orders']['links'].length; i++) {
       setState(() {
         link_url.add(data['pickup_orders']['links'][i]["url"]);
-        if(data['pickup_orders']['links'][i]["label"]=="&laquo; Previous"){
+        if (data['pickup_orders']['links'][i]["label"] == "&laquo; Previous") {
           link_label.add("< Previous");
-        }else if (data['pickup_orders']['links'][i]["label"]=="Next &raquo;"){
+        } else if (data['pickup_orders']['links'][i]["label"] ==
+            "Next &raquo;") {
           link_label.add("Next >");
-        }else{
+        } else {
           link_label.add(data['pickup_orders']['links'][i]["label"]);
         }
         link_active.add(data['pickup_orders']['links'][i]["active"]);
@@ -195,6 +196,11 @@ class _HistorisState extends State<Historis> {
       });
     }
     print(status);
+    Future.delayed(const Duration(milliseconds: 1000), () {
+      setState(() {
+        loading = false;
+      });
+    });
   }
 
   getPref() async {
@@ -205,7 +211,6 @@ class _HistorisState extends State<Historis> {
       },
     );
     get_data();
-    setState((){ loading = false; });
   }
 
   @override
@@ -246,90 +251,83 @@ class _HistorisState extends State<Historis> {
 
   @override
   Widget build(BuildContext context) {
-    if(loading) return Scaffold(
-        appBar: AppBar(
-            title: Text(
-              "Riwayat",
-              style: TextStyle(
-                color: Colors.blue, // 3
-              ),
+    if (loading)
+      return Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+        bottomNavigationBar: BottomNavigationBar(
+          type: BottomNavigationBarType.fixed,
+          items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home_outlined),
+              label: 'Beranda',
             ),
-            automaticallyImplyLeading: false,
-            backgroundColor: Colors.white,
-            elevation: 0),body: Center(child: CircularProgressIndicator()),bottomNavigationBar: BottomNavigationBar(
-      type: BottomNavigationBarType.fixed,
-      items: const <BottomNavigationBarItem>[
-        BottomNavigationBarItem(
-          icon: Icon(Icons.home_outlined),
-          title: Text('Beranda'),
+            BottomNavigationBarItem(
+              icon: Icon(FlutterIcons.file_text_o_faw),
+              label: 'Riwayat',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.chat_outlined),
+              label: 'Pesan',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person_outline),
+              label: 'Profil',
+            ),
+          ],
+          currentIndex: _selectedNavbar,
+          selectedItemColor: Colors.blue,
+          unselectedItemColor: Colors.blueGrey,
+          showUnselectedLabels: true,
+          onTap: (index) {
+            switch (index) {
+              case 0:
+                Navigator.push(
+                  context,
+                  PageRouteBuilder(
+                    pageBuilder: (c, a1, a2) => LoginPage(),
+                    transitionsBuilder: (c, anim, a2, child) =>
+                        FadeTransition(opacity: anim, child: child),
+                    transitionDuration: Duration(milliseconds: 200),
+                  ),
+                );
+                break;
+              case 1:
+                Navigator.push(
+                  context,
+                  PageRouteBuilder(
+                    pageBuilder: (c, a1, a2) => Historis(),
+                    transitionsBuilder: (c, anim, a2, child) =>
+                        FadeTransition(opacity: anim, child: child),
+                    transitionDuration: Duration(milliseconds: 300),
+                  ),
+                );
+                break;
+              case 2:
+                Navigator.push(
+                  context,
+                  PageRouteBuilder(
+                    pageBuilder: (c, a1, a2) => ChatList(),
+                    transitionsBuilder: (c, anim, a2, child) =>
+                        FadeTransition(opacity: anim, child: child),
+                    transitionDuration: Duration(milliseconds: 300),
+                  ),
+                );
+                break;
+              case 3:
+                Navigator.push(
+                  context,
+                  PageRouteBuilder(
+                    pageBuilder: (c, a1, a2) => Account(),
+                    transitionsBuilder: (c, anim, a2, child) =>
+                        FadeTransition(opacity: anim, child: child),
+                    transitionDuration: Duration(milliseconds: 300),
+                  ),
+                );
+                break;
+            }
+          },
         ),
-        BottomNavigationBarItem(
-          icon: Icon(FlutterIcons.file_text_o_faw),
-          title: Text('Riwayat'),
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.chat_outlined),
-          title: Text('Pesan'),
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.person_outline),
-          title: Text('Profil'),
-        ),
-      ],
-      currentIndex: _selectedNavbar,
-      selectedItemColor: Colors.blue,
-      unselectedItemColor: Colors.blueGrey,
-      showUnselectedLabels: true,
-      onTap: (index) {
-        switch (index) {
-          case 0:
-            Navigator.push(
-              context,
-              PageRouteBuilder(
-                pageBuilder: (c, a1, a2) => LoginPage(),
-                transitionsBuilder: (c, anim, a2, child) =>
-                    FadeTransition(opacity: anim, child: child),
-                transitionDuration: Duration(milliseconds: 200),
-              ),
-            );
-            break;
-          case 1:
-            Navigator.push(
-              context,
-              PageRouteBuilder(
-                pageBuilder: (c, a1, a2) => Historis(),
-                transitionsBuilder: (c, anim, a2, child) =>
-                    FadeTransition(opacity: anim, child: child),
-                transitionDuration: Duration(milliseconds: 300),
-              ),
-            );
-            break;
-          case 2:
-            Navigator.push(
-              context,
-              PageRouteBuilder(
-                pageBuilder: (c, a1, a2) => ChatList(),
-                transitionsBuilder: (c, anim, a2, child) =>
-                    FadeTransition(opacity: anim, child: child),
-                transitionDuration: Duration(milliseconds: 300),
-              ),
-            );
-            break;
-          case 3:
-            Navigator.push(
-              context,
-              PageRouteBuilder(
-                pageBuilder: (c, a1, a2) => Account(),
-                transitionsBuilder: (c, anim, a2, child) =>
-                    FadeTransition(opacity: anim, child: child),
-                transitionDuration: Duration(milliseconds: 300),
-              ),
-            );
-            break;
-        }
-      },
-    ),);
-
+      );
 
     return Center(
       child: Container(
@@ -445,6 +443,81 @@ class _HistorisState extends State<Historis> {
                         ],
                       ),
                     ),
+                    Container(
+                      margin: EdgeInsets.fromLTRB(40, 10, 40, 10),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Container(
+                            width: 130,
+                            child: Text(
+                              'ID Order',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          Container(
+                            width: 130,
+                            child: Text(
+                              'Tanggal Order',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          Container(
+                            width: 300,
+                            child: Text(
+                              'Alamat',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          Container(
+                            width: 130,
+                            child: Text(
+                              'Volume Minyak',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          Container(
+                            width: 130,
+                            child: Text(
+                              'Tanggal Penjemputan',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          Container(
+                            alignment: Alignment.center,
+                            width: 130,
+                            child: Text(
+                              'Status',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                     Expanded(
                       child: Scrollbar(
                         showTrackOnHover: true,
@@ -524,19 +597,19 @@ class _HistorisState extends State<Historis> {
               items: const <BottomNavigationBarItem>[
                 BottomNavigationBarItem(
                   icon: Icon(Icons.home_outlined),
-                  title: Text('Beranda'),
+                  label: 'Beranda',
                 ),
                 BottomNavigationBarItem(
                   icon: Icon(FlutterIcons.file_text_o_faw),
-                  title: Text('Riwayat'),
+                  label: 'Riwayat',
                 ),
                 BottomNavigationBarItem(
                   icon: Icon(Icons.chat_outlined),
-                  title: Text('Pesan'),
+                  label: 'Pesan',
                 ),
                 BottomNavigationBarItem(
                   icon: Icon(Icons.person_outline),
-                  title: Text('Profil'),
+                  label: 'Profil',
                 ),
               ],
               currentIndex: _selectedNavbar,
@@ -606,7 +679,7 @@ class _HistorisState extends State<Historis> {
           Future.delayed(const Duration(milliseconds: 3000), () {
             setState(() {
               if (link_url != null && link_active != true) {
-                if(isRedundentClick(DateTime.now())){
+                if (isRedundentClick(DateTime.now())) {
                   print('hold on, processing');
                   return;
                 }
@@ -674,11 +747,13 @@ class _HistorisState extends State<Historis> {
       for (i = 0; i < data['pickup_orders']['links'].length; i++) {
         setState(() {
           link_url.add(data['pickup_orders']['links'][i]["url"]);
-          if(data['pickup_orders']['links'][i]["label"]=="&laquo; Previous"){
+          if (data['pickup_orders']['links'][i]["label"] ==
+              "&laquo; Previous") {
             link_label.add("< Previous");
-          }else if (data['pickup_orders']['links'][i]["label"]=="Next &raquo;"){
+          } else if (data['pickup_orders']['links'][i]["label"] ==
+              "Next &raquo;") {
             link_label.add("Next >");
-          }else{
+          } else {
             link_label.add(data['pickup_orders']['links'][i]["label"]);
           }
           link_active.add(data['pickup_orders']['links'][i]["active"]);
@@ -704,7 +779,7 @@ class _HistorisState extends State<Historis> {
           estimate_volume.add(
               data['pickup_orders']['data'][i]['estimate_volume'].toString());
           var check_weighing_volume =
-          data['pickup_orders']['data'][i]['weighing_volume'].toString();
+              data['pickup_orders']['data'][i]['weighing_volume'].toString();
           if (check_weighing_volume == null) {
             weighing_volume.add("-");
           } else {
@@ -713,7 +788,8 @@ class _HistorisState extends State<Historis> {
           status.add(data['pickup_orders']['data'][i]['status']);
           tanggalOrder.add(formatTanggal(tanggal));
           latitude.add(data['pickup_orders']['data'][i]['latitude'].toString());
-          longitude.add(data['pickup_orders']['data'][i]['longitude'].toString());
+          longitude
+              .add(data['pickup_orders']['data'][i]['longitude'].toString());
         });
       }
       setState(() {
@@ -776,22 +852,292 @@ class _HistorisState extends State<Historis> {
 
   DateTime loginClickTime;
 
-  bool isRedundentClick(DateTime currentTime){
-    if(loginClickTime==null){
+  bool isRedundentClick(DateTime currentTime) {
+    if (loginClickTime == null) {
       loginClickTime = currentTime;
       print("first click");
       return false;
     }
     print('diff is ${currentTime.difference(loginClickTime).inSeconds}');
-    if(currentTime.difference(loginClickTime).inSeconds<10){//set this difference time in seconds
+    if (currentTime.difference(loginClickTime).inSeconds < 10) {
+      //set this difference time in seconds
       return true;
     }
 
     loginClickTime = currentTime;
     return false;
   }
-
 }
+
+// class RC_Historis extends StatelessWidget {
+//   RC_Historis(
+//       {this.orderid,
+//       this.alamat,
+//       this.tanggalOrder,
+//       this.status,
+//       this.volume,
+//       this.pickup_date,
+//       this.latitude,
+//       this.longitude,
+//       this.volume_real});
+//
+//   String orderid,
+//       alamat,
+//       tanggalOrder,
+//       status,
+//       volume,
+//       pickup_date,
+//       latitude,
+//       longitude,
+//       volume_real;
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return GestureDetector(
+//       onTap: () {
+//         if (status == "closed") {
+//           Navigator.of(context).push(MaterialPageRoute(
+//               builder: (context) => Historis_Item_Selesai(orderid: orderid)));
+//         } else if (status == "cancelled" ||
+//             status == "cancelled_by_driver" ||
+//             status == "cancelled_by_contributor") {
+//           Navigator.of(context).push(MaterialPageRoute(
+//               builder: (context) => Historis_Item_Batal(orderid: orderid)));
+//         }
+//         // else if(status=="cancelled_by_driver"){
+//         //   Navigator.of(context).push(MaterialPageRoute(
+//         //       builder: (context) =>
+//         //           Historis_Item_Batal(orderid: orderid)));
+//         // }else if(status=="cancelled_by_contributor"){
+//         //   Navigator.of(context).push(MaterialPageRoute(
+//         //       builder: (context) =>
+//         //           Historis_Item_Batal(orderid: orderid)));
+//         // }
+//         else if (status == "on_pickup") {
+//           Navigator.of(context).push(MaterialPageRoute(
+//               builder: (context) => DetailPermintaanPerjalanan(orderid: orderid, latitude:latitude, longitude:longitude)));
+//         } else {
+//           Navigator.of(context).push(MaterialPageRoute(
+//               builder: (context) => DetailPermintaan(
+//                   orderid: orderid, latitude: latitude, longitude: longitude)));
+//         }
+//       },
+//       child: Container(
+//         margin: EdgeInsets.fromLTRB(30, 5, 30, 5),
+//         decoration: BoxDecoration(
+//             color: Colors.white, borderRadius: BorderRadius.circular(10)),
+//         child: Container(
+//           margin: EdgeInsets.all(10),
+//           child: Column(
+//             crossAxisAlignment: CrossAxisAlignment.start,
+//             children: [
+//               Container(
+//                 width: double.infinity,
+//                 padding: EdgeInsets.only(
+//                   top: 10,
+//                   bottom: 10,
+//                 ),
+//                 decoration: BoxDecoration(
+//                   color: Colors.white,
+//                   borderRadius:
+//                       BorderRadius.vertical(top: Radius.circular(10.0)),
+//                 ),
+//                 child: Row(
+//                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                   children: [
+//                     Text(
+//                       'ID ' + orderid,
+//                       style: TextStyle(
+//                         fontSize: 15,
+//                         color: Colors.black,
+//                         fontWeight: FontWeight.bold,
+//                       ),
+//                     ),
+//                     Text(
+//                       tanggalOrder,
+//                       style: TextStyle(
+//                         fontSize: 12,
+//                         color: Colors.black,
+//                         fontWeight: FontWeight.bold,
+//                       ),
+//                     ),
+//                   ],
+//                 ),
+//               ),
+//               Text(
+//                 'Alamat',
+//                 style: TextStyle(
+//                   fontSize: 10,
+//                   color: Colors.grey,
+//                   fontWeight: FontWeight.bold,
+//                 ),
+//               ),
+//               Text(
+//                 alamat,
+//                 style: TextStyle(
+//                   fontSize: 12,
+//                   color: Colors.black,
+//                   fontWeight: FontWeight.bold,
+//                 ),
+//               ),
+//               SizedBox(
+//                 height: 10,
+//               ),
+//               if (status == "closed")
+//                 Text(
+//                   'Tanggal Penjemputan',
+//                   style: TextStyle(
+//                     fontSize: 10,
+//                     color: Colors.grey,
+//                     fontWeight: FontWeight.bold,
+//                   ),
+//                 ),
+//               if (status != "closed")
+//                 Text(
+//                   'Estimasi Penjemputan',
+//                   style: TextStyle(
+//                     fontSize: 10,
+//                     color: Colors.grey,
+//                     fontWeight: FontWeight.bold,
+//                   ),
+//                 ),
+//               Text(
+//                 pickup_date,
+//                 style: TextStyle(
+//                   fontSize: 12,
+//                   color: Colors.black,
+//                   fontWeight: FontWeight.bold,
+//                 ),
+//               ),
+//               SizedBox(
+//                 height: 10,
+//               ),
+//               Row(
+//                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                 children: [
+//                   if (status != 'closed')
+//                     Column(
+//                       crossAxisAlignment: CrossAxisAlignment.start,
+//                       children: [
+//                         Text(
+//                           'Estimasi Total Volume',
+//                           style: TextStyle(
+//                             fontSize: 10,
+//                             color: Colors.grey,
+//                             fontWeight: FontWeight.bold,
+//                           ),
+//                         ),
+//                         Text(
+//                           volume + ' Liter',
+//                           style: TextStyle(
+//                             fontSize: 12,
+//                             color: Colors.black,
+//                             fontWeight: FontWeight.bold,
+//                           ),
+//                         ),
+//                       ],
+//                     ),
+//                   if (status == 'closed')
+//                     Column(
+//                       crossAxisAlignment: CrossAxisAlignment.start,
+//                       children: [
+//                         Text(
+//                           'Total Volume Asli',
+//                           style: TextStyle(
+//                             fontSize: 10,
+//                             color: Colors.grey,
+//                             fontWeight: FontWeight.bold,
+//                           ),
+//                         ),
+//                         Text(
+//                           volume_real + ' Liter',
+//                           style: TextStyle(
+//                             fontSize: 12,
+//                             color: Colors.black,
+//                             fontWeight: FontWeight.bold,
+//                           ),
+//                         ),
+//                       ],
+//                     ),
+//                   if (status == 'closed')
+//                     TextButton(
+//                       onPressed: () {},
+//                       child: Text(
+//                         "Selesai",
+//                         style: TextStyle(color: Colors.green),
+//                       ),
+//                       style: ButtonStyle(
+//                           backgroundColor: MaterialStateProperty.all(
+//                             Color(0xffECF8ED),
+//                           ),
+//                           shape:
+//                               MaterialStateProperty.all<RoundedRectangleBorder>(
+//                                   RoundedRectangleBorder(
+//                             borderRadius: BorderRadius.circular(10.0),
+//                           ))),
+//                     ),
+//                   if (status == "cancelled" ||
+//                       status == "cancelled_by_driver" ||
+//                       status == "cancelled_by_contributor")
+//                     TextButton(
+//                       onPressed: () {},
+//                       child: Text(
+//                         "Batal",
+//                         style: TextStyle(color: Colors.red),
+//                       ),
+//                       style: ButtonStyle(
+//                           backgroundColor: MaterialStateProperty.all(
+//                             Color(0xffFBE8E8),
+//                           ),
+//                           shape:
+//                               MaterialStateProperty.all<RoundedRectangleBorder>(
+//                                   RoundedRectangleBorder(
+//                             borderRadius: BorderRadius.circular(10.0),
+//                           ))),
+//                     ),
+//                   if (status == 'processed')
+//                     TextButton(
+//                       onPressed: () {},
+//                       child: Text(
+//                         "Proses",
+//                         style: TextStyle(color: Colors.blueAccent),
+//                       ),
+//                       style: ButtonStyle(
+//                           backgroundColor: MaterialStateProperty.all(
+//                             Color(0xffE7EEF4),
+//                           ),
+//                           shape:
+//                               MaterialStateProperty.all<RoundedRectangleBorder>(
+//                                   RoundedRectangleBorder(
+//                             borderRadius: BorderRadius.circular(10.0),
+//                           ))),
+//                     ),
+//                   if (status == 'on_pickup')
+//                     TextButton(
+//                       onPressed: () {},
+//                       child: Text(
+//                         "Dalam Perjalanan",
+//                         style: TextStyle(color: Colors.orange),
+//                       ),
+//                       style: ButtonStyle(
+//                           backgroundColor: MaterialStateProperty.all(
+//                             Color(0xffFEF5E8),
+//                           ),
+//                           shape:
+//                               MaterialStateProperty.all<RoundedRectangleBorder>(
+//                                   RoundedRectangleBorder(
+//                             borderRadius: BorderRadius.circular(10.0),
+//                           ))),
+//                     ),
+//                 ],
+//               ),
+//             ],
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }
 
 class RC_Historis extends StatelessWidget {
   RC_Historis(
@@ -827,19 +1173,10 @@ class RC_Historis extends StatelessWidget {
             status == "cancelled_by_contributor") {
           Navigator.of(context).push(MaterialPageRoute(
               builder: (context) => Historis_Item_Batal(orderid: orderid)));
-        }
-        // else if(status=="cancelled_by_driver"){
-        //   Navigator.of(context).push(MaterialPageRoute(
-        //       builder: (context) =>
-        //           Historis_Item_Batal(orderid: orderid)));
-        // }else if(status=="cancelled_by_contributor"){
-        //   Navigator.of(context).push(MaterialPageRoute(
-        //       builder: (context) =>
-        //           Historis_Item_Batal(orderid: orderid)));
-        // }
-        else if (status == "on_pickup") {
+        } else if (status == "on_pickup") {
           Navigator.of(context).push(MaterialPageRoute(
-              builder: (context) => DetailPermintaanPerjalanan(orderid: orderid, latitude:latitude, longitude:longitude)));
+              builder: (context) => DetailPermintaanPerjalanan(
+                  orderid: orderid, latitude: latitude, longitude: longitude)));
         } else {
           Navigator.of(context).push(MaterialPageRoute(
               builder: (context) => DetailPermintaan(
@@ -852,210 +1189,168 @@ class RC_Historis extends StatelessWidget {
             color: Colors.white, borderRadius: BorderRadius.circular(10)),
         child: Container(
           margin: EdgeInsets.all(10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: double.infinity,
-                padding: EdgeInsets.only(
-                  top: 10,
-                  bottom: 10,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius:
-                      BorderRadius.vertical(top: Radius.circular(10.0)),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'ID ' + orderid,
-                      style: TextStyle(
-                        fontSize: 15,
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold,
-                      ),
+          child: Container(
+            width: double.infinity,
+            padding: EdgeInsets.only(
+              top: 5,
+              bottom: 5,
+            ),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(10.0)),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  width: 130,
+                  child: Text(
+                    orderid,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
                     ),
-                    Text(
-                      tanggalOrder,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Text(
-                'Alamat',
-                style: TextStyle(
-                  fontSize: 10,
-                  color: Colors.grey,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                alamat,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              SizedBox(
-                height: 10,
-              ),
-              if (status == "closed")
-                Text(
-                  'Tanggal Penjemputan',
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: Colors.grey,
-                    fontWeight: FontWeight.bold,
                   ),
                 ),
-              if (status != "closed")
-                Text(
-                  'Estimasi Penjemputan',
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: Colors.grey,
-                    fontWeight: FontWeight.bold,
+                Container(
+                  width: 130,
+                  child: Text(
+                    tanggalOrder,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
-              Text(
-                pickup_date,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold,
+                Container(
+                  width: 300,
+                  child: Text(
+                    alamat,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
-              ),
-              SizedBox(
-                height: 10,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  if (status != 'closed')
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
+                Container(
+                  width: 130,
+                  child: Row(
+                    children: [
+                      if (status != 'closed')
                         Text(
-                          'Estimasi Total Volume',
-                          style: TextStyle(
-                            fontSize: 10,
-                            color: Colors.grey,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          volume + ' Liter',
+                          volume + ' Liter (Estimasi)',
                           style: TextStyle(
                             fontSize: 12,
                             color: Colors.black,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                      ],
-                    ),
-                  if (status == 'closed')
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
+                      if (status == 'closed')
                         Text(
-                          'Total Volume Asli',
-                          style: TextStyle(
-                            fontSize: 10,
-                            color: Colors.grey,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          volume_real + ' Liter',
+                          volume_real + ' Liter (Asli)',
                           style: TextStyle(
                             fontSize: 12,
                             color: Colors.black,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                      ],
+                    ],
+                  ),
+                ),
+                Container(
+                  width: 130,
+                  child: Text(
+                    pickup_date,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
                     ),
-                  if (status == 'closed')
-                    TextButton(
-                      onPressed: () {},
-                      child: Text(
-                        "Selesai",
-                        style: TextStyle(color: Colors.green),
-                      ),
-                      style: ButtonStyle(
-                          backgroundColor: MaterialStateProperty.all(
-                            Color(0xffECF8ED),
+                  ),
+                ),
+                Container(
+                  width: 130,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      if (status == 'closed')
+                        TextButton(
+                          onPressed: () {},
+                          child: Text(
+                            "Selesai",
+                            style: TextStyle(color: Colors.green),
                           ),
-                          shape:
-                              MaterialStateProperty.all<RoundedRectangleBorder>(
+                          style: ButtonStyle(
+                              backgroundColor: MaterialStateProperty.all(
+                                Color(0xffECF8ED),
+                              ),
+                              shape: MaterialStateProperty.all<
+                                      RoundedRectangleBorder>(
                                   RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10.0),
-                          ))),
-                    ),
-                  if (status == "cancelled" ||
-                      status == "cancelled_by_driver" ||
-                      status == "cancelled_by_contributor")
-                    TextButton(
-                      onPressed: () {},
-                      child: Text(
-                        "Batal",
-                        style: TextStyle(color: Colors.red),
-                      ),
-                      style: ButtonStyle(
-                          backgroundColor: MaterialStateProperty.all(
-                            Color(0xffFBE8E8),
+                                borderRadius: BorderRadius.circular(10.0),
+                              ))),
+                        ),
+                      if (status == "cancelled" ||
+                          status == "cancelled_by_driver" ||
+                          status == "cancelled_by_contributor")
+                        TextButton(
+                          onPressed: () {},
+                          child: Text(
+                            "Batal",
+                            style: TextStyle(color: Colors.red),
                           ),
-                          shape:
-                              MaterialStateProperty.all<RoundedRectangleBorder>(
+                          style: ButtonStyle(
+                              backgroundColor: MaterialStateProperty.all(
+                                Color(0xffFBE8E8),
+                              ),
+                              shape: MaterialStateProperty.all<
+                                      RoundedRectangleBorder>(
                                   RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10.0),
-                          ))),
-                    ),
-                  if (status == 'processed')
-                    TextButton(
-                      onPressed: () {},
-                      child: Text(
-                        "Proses",
-                        style: TextStyle(color: Colors.blueAccent),
-                      ),
-                      style: ButtonStyle(
-                          backgroundColor: MaterialStateProperty.all(
-                            Color(0xffE7EEF4),
+                                borderRadius: BorderRadius.circular(10.0),
+                              ))),
+                        ),
+                      if (status == 'processed')
+                        TextButton(
+                          onPressed: () {},
+                          child: Text(
+                            "Proses",
+                            style: TextStyle(color: Colors.blueAccent),
                           ),
-                          shape:
-                              MaterialStateProperty.all<RoundedRectangleBorder>(
+                          style: ButtonStyle(
+                              backgroundColor: MaterialStateProperty.all(
+                                Color(0xffE7EEF4),
+                              ),
+                              shape: MaterialStateProperty.all<
+                                      RoundedRectangleBorder>(
                                   RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10.0),
-                          ))),
-                    ),
-                  if (status == 'on_pickup')
-                    TextButton(
-                      onPressed: () {},
-                      child: Text(
-                        "Dalam Perjalanan",
-                        style: TextStyle(color: Colors.orange),
-                      ),
-                      style: ButtonStyle(
-                          backgroundColor: MaterialStateProperty.all(
-                            Color(0xffFEF5E8),
+                                borderRadius: BorderRadius.circular(10.0),
+                              ))),
+                        ),
+                      if (status == 'on_pickup')
+                        TextButton(
+                          onPressed: () {},
+                          child: Text(
+                            "Dalam Perjalanan",
+                            style: TextStyle(color: Colors.orange),
                           ),
-                          shape:
-                              MaterialStateProperty.all<RoundedRectangleBorder>(
+                          style: ButtonStyle(
+                              backgroundColor: MaterialStateProperty.all(
+                                Color(0xffFEF5E8),
+                              ),
+                              shape: MaterialStateProperty.all<
+                                      RoundedRectangleBorder>(
                                   RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10.0),
-                          ))),
-                    ),
-                ],
-              ),
-            ],
+                                borderRadius: BorderRadius.circular(10.0),
+                              ))),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
